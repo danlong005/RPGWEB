@@ -1,0 +1,72 @@
+pgm
+
+
+  /*                                                            */
+  /*  COMPILE THIS PROGRAM WITH THE FOLLOWING COMMAND           */
+  /*  QSYS/CRTBNDCL PGM(LONGDM/BUILD)                           */
+  /*            SRCSTMF('/home/LONGDM/RPGWEB/build.clle')       */
+  /*                                                            */
+
+
+  /* create the library RPGWEB */
+  CRTLIB LIB(RPGWEB)
+  MONMSG MSGID(CPF2111)
+
+  
+  /* create the BNDDIR in RPGWEB */
+  CRTBNDDIR BNDDIR(RPGWEB/RPGWEB)
+  MONMSG MSGID(CPF5D10)
+  MONMSG MSGID(CPF5D0B)
+
+
+  /* create the PF-SRC file QRPGLESRC */
+  CRTSRCPF FILE(RPGWEB/QRPGLESRC) RCDLEN(112)            
+  MONMSG MSGID(CPF5813)
+  MONMSG MSGID(CPF7302)
+
+
+  /* copy the source from the IFS */
+  CPYFRMSTMF FROMSTMF('/home/LONGDM/RPGWEB/RPGWEB.SQLRPGLE') + 
+             TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/RPGWEB.MBR') + 
+             MBROPT(*REPLACE)                       
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB) SRCTYPE(SQLRPGLE)
+
+  CPYFRMSTMF FROMSTMF('/home/LONGDM/RPGWEB/RPGWEB_H.rpgle') + 
+             TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/RPGWEB_H.MBR') + 
+             MBROPT(*REPLACE)
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB_H) SRCTYPE(RPGLE)
+
+  CPYFRMSTMF FROMSTMF('/home/LONGDM/RPGWEB/HTTP_H.rpgle') + 
+             TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/HTTP_H.MBR') + 
+             MBROPT(*REPLACE)
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(HTTP_H) SRCTYPE(RPGLE)
+
+  CPYFRMSTMF FROMSTMF('/home/LONGDM/RPGWEB/RPGWEB_B.bnd') + 
+             TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/RPGWEB_B.MBR') + 
+             MBROPT(*REPLACE)
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB_B) SRCTYPE(BND)
+
+  CPYFRMSTMF FROMSTMF('/home/LONGDM/RPGWEB/app.sqlrpgle') +     
+           TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/app.MBR') +                                        
+           MBROPT(*REPLACE)   
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB) SRCTYPE(SQLRPGLE)         
+
+  /* compile the module */
+  CRTSQLRPGI OBJ(RPGWEB/RPGWEB) +         
+             SRCFILE(RPGWEB/QRPGLESRC) +   
+             SRCMBR(RPGWEB) +             
+             OBJTYPE(*MODULE) +           
+             REPLACE(*YES) +                
+             DBGVIEW(*SOURCE)            
+
+
+  /* compile the service program */
+  CRTSRVPGM SRVPGM(RPGWEB/RPGWEB) +     
+          MODULE(RPGWEB/RPGWEB) +     
+          SRCFILE(RPGWEB/QRPGLESRC) +  
+          SRCMBR(RPGWEB_B)           
+
+
+  /* add the entry in the BNDDIR */
+  ADDBNDDIRE BNDDIR(RPGWEB/RPGWEB) OBJ((RPGWEB/RPGWEB))                                                       
+endpgm
