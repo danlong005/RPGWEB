@@ -1,12 +1,5 @@
 PGM PARM(&LOCATION)
 
-  
-  /*                                                            */
-  /*  COMPILE THIS PROGRAM WITH THE FOLLOWING COMMAND           */
-  /*  QSYS/CRTBNDCL PGM(BUILD)                                  */
-  /*            SRCSTMF('/download/location/RPGWEB/build.clle') */
-  /*                                                            */
-
   DCL &LOCATION *CHAR LEN(45)
   DCL &POSITION *UINT LEN(2)
 

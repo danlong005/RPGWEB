@@ -12,14 +12,15 @@ git clone ....
 
 Then exit QShell and run the following CL command
 ```
-QSYS/CRTBNDCL PGM([YOURLIB]/BUILD)
-              SRCSTMF('/RPGWEB/build.clle')
+QSYS/CRTBNDCL PGM([YOURLIB]/BUILD)                        
+              SRCSTMF('/downloaded/location/RPGWEB/build.clle')
+              DBGVIEW(*SOURCE)                         
 ```
 
 Then you can run the build script to create the RPGWEB library, and all of the 
 programs, and include files.
 ```
-CALL YOURLIB/BUILD
+CALL [YOURLIB]/BUILD PARM('/downloaded/location')
 ```
 
 That's it!!! Now you are ready to write completely RPGLE web api's. Here is 
