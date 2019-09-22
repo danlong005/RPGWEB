@@ -3,7 +3,7 @@
 ## Description
 A small RPGLE web framework for building web api's on the IBM i.
 
-## Local Setup
+## Installation
 In QShell
 ```
 cd /
