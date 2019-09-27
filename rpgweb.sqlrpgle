@@ -3,7 +3,7 @@
 
           dcl-proc RPGWEB_start export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
             end-pi;
             dcl-s index int(10:0) inz;
             dcl-s route_found ind inz;
@@ -45,7 +45,7 @@
 
           dcl-proc RPGWEB_stop export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG) const;
+              config likeds(RPGWEBAPP) const;
             end-pi;
 
             close_port( config.return_socket_descriptor );
@@ -56,7 +56,7 @@
 
           dcl-proc RPGWEB_acceptRequest export;
             dcl-pi *n likeds(RPGWEBRQST);
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
             end-pi;
             dcl-ds socket_address likeds(socketaddr);
             dcl-s data char(32766);
@@ -273,7 +273,7 @@
 
           dcl-proc RPGWEB_sendResponse export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG) const;
+              config likeds(RPGWEBAPP) const;
               response likeds(RPGWEBRSP) const;
             end-pi;
             dcl-s data char(32766);
@@ -318,7 +318,7 @@
 
           dcl-proc RPGWEB_setup;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
             end-pi;
             dcl-s return_code int(10:0) inz(0);
             dcl-ds socket_address likeds(socketaddr);
@@ -358,7 +358,7 @@
 
           dcl-proc RPGWEB_setRoute export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
               method char(10) const;
               url varchar(32000) const;
               procedure pointer(*proc) const;
@@ -379,7 +379,7 @@
 
           dcl-proc RPGWEB_get export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
@@ -391,7 +391,7 @@
 
           dcl-proc RPGWEB_put export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
@@ -403,7 +403,7 @@
 
           dcl-proc RPGWEB_post export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
@@ -415,7 +415,7 @@
 
           dcl-proc RPGWEB_delete export;
             dcl-pi *n;
-              config likeds(RPGWEBCFG);
+              config likeds(RPGWEBAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;

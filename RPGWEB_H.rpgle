@@ -47,7 +47,7 @@
           status int(10:0);
         end-ds;
 
-        dcl-ds RPGWEBCFG qualified template;
+        dcl-ds RPGWEBAPP qualified template;
           port int(10:0);
           socket_descriptor int(10:0);
           return_socket_descriptor int(10:0);
@@ -61,15 +61,15 @@
         end-pr;
 
         dcl-pr RPGWEB_start;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
         end-pr;
 
         dcl-pr RPGWEB_stop;
-          config likeds(RPGWEBCFG) const;
+          config likeds(RPGWEBAPP) const;
         end-pr;
 
         dcl-pr RPGWEB_acceptRequest likeds(RPGWEBRQST);
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
         end-pr;
 
         dcl-pr RPGWEB_parse likeds(RPGWEBRQST);
@@ -98,41 +98,41 @@
         end-pr;
 
         dcl-pr RPGWEB_sendResponse;
-          config likeds(RPGWEBCFG) const;
+          config likeds(RPGWEBAPP) const;
           response likeds(RPGWEBRSP) const;
         end-pr;
 
         dcl-pr RPGWEB_setup;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
         end-pr;
 
         dcl-pr RPGWEB_setRoute;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
           method char(10) const;
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
         dcl-pr RPGWEB_get;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
         dcl-pr RPGWEB_put;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
         dcl-pr RPGWEB_post;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
         dcl-pr RPGWEB_delete;
-          config likeds(RPGWEBCFG);
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
@@ -272,53 +272,31 @@
      D  filep2                      260A
      D  reserved2                   150A
 
-      ***************************************************************
-      * Socket Address Families
-      ***************************************************************
-     D AF_UNIX         c                   1
-     D AF_INET         c                   2
-     D AF_NS           c                   6
-     D AF_TELEPHONY    c                   99
-
-      ***************************************************************
-      * Socket Types
-      ***************************************************************
-     D SOCK_STREAM     c                   1
-     D SOCK_DGRAM      c                   2
-     D SOCK_RAW        c                   3
-     D SOCK_SEQPACKET  c                   5
-
-      ***************************************************************
-      * Socket Level Option
-      ***************************************************************
-     D SOL_SOCKET      c                   -1
-
-      ***************************************************************
-      * Socket Level Option Names
-      ***************************************************************
-     D SO_BROADCAST    c                   5
-     D SO_DEBUG        c                   10
-     D SO_DONTROUTE    c                   15
-     D SO_ERROR        c                   20
-     D SO_KEEPALIVE    c                   25
-     D SO_LINGER       c                   30
-     D SO_OOBINLINE    c                   35
-     D SO_RCVBUF       c                   40
-     D SO_RCVLOWAT     c                   45
-     D SO_REUSEADDR    c                   55
-     D SO_SNDBUF       c                   60
-     D SO_SNDLOWAT     c                   65
-     D SO_SNDTIMEO     c                   70
-     D SO_TYPE         c                   75
-     D SO_USELOOPBACK  c                   80
-
-      ***************************************************************
-      * Address Wildcard
-      ***************************************************************
-     D INADDR_ANY      c                   0
-
-      ***************************************************************
-      * Return Code "OK" value
-      ***************************************************************
-     D RC_OK           c                   0
+       dcl-c AF_UNIX 1;
+       dcl-c AF_INEXT 2;
+       dcl-c AF_NS 6;
+       dcl-c AF_TELEPHONY 99;
+       dcl-c SOCK_STREAM 1;
+       dcl-c SOCK_DGRAM 2;
+       dcl-c SOCK_RAW 3;
+       dcl-c SOCK_SEQPACKET 5;
+       dcl-c SOL_SOCKET -1;
+       dcl-c SO_BROADCAST 5;
+       dcl-c SO_DEBUG 10;
+       dcl-c SO_DONTROUTE 15;
+       dcl-c SO_ERROR 20;
+       dcl-c SO_KEEPALIVE 25;
+       dcl-c SO_LINGER 30;
+       dcl-c SO_OOBINLINE 35;
+       dcl-c SO_RCVBUF 40;
+       dcl-c SO_RCVLOWAT 45;
+       dcl-c SO_REUSEADDR 55;
+       dcl-c SO_SNDBUF 60;
+       dcl-c SO_SNDLOWAT 65;
+       dcl-c SO_SNDTIMEO 70;
+       dcl-c SO_TYPE 75;
+       dcl-c SO_USELOOPBACK 80;
+       dcl-c INADDR_ANY 0;
+       dcl-c RC_OK 0;
+       
       /endif

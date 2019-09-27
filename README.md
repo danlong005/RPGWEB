@@ -23,8 +23,8 @@ programs, and include files.
 CALL [YOURLIB]/BUILD PARM('/downloaded/location')
 ```
 
-That's it!!! Now you are ready to write completely RPGLE web api's. Here is 
-an example. 
+That's it!!! Now you are ready to write completely RPGLE web api's. Check the 
+Quick start guide for a quick intro.
 
 For getting started quickly here is a small quick start guide
 
