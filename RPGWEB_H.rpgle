@@ -51,13 +51,20 @@
           port int(10:0);
           socket_descriptor int(10:0);
           return_socket_descriptor int(10:0);
-          routes likeds(RPGWEB_route_ds) dim(500);
+          routes likeds(RPGWEB_route_ds) dim(250);
+          middlewares likeds(RPGWEB_route_ds) dim(100);
         end-ds;
 
 
         dcl-s RPGWEB_callback_ptr pointer(*proc);
         dcl-pr RPGWEB_callBack extproc(RPGWEB_callBack_ptr) likeds(RPGWEBRSP);
           request likeds(RPGWEBRQST) const;
+        end-pr;
+
+        dcl-s RPGWEB_mwCallback_ptr pointer(*proc);
+        dcl-pr RPGWEB_mwCallback ind extproc(RPGWEB_mwCallback_ptr);
+          request likeds(RPGWEBRQST) const;
+          response likeds(RPGWEBRSP) const;
         end-pr;
 
         dcl-pr RPGWEB_start;
@@ -102,6 +109,11 @@
           request likeds(RPGWEBRQST);
         end-pr;
 
+        dcl-pr RPGWEB_mwMatches ind;
+          route likeds(RPGWEB_route_ds);
+          request likeds(RPGWEBRQST);
+        end-pr;
+
         dcl-pr RPGWEB_sendResponse;
           config likeds(RPGWEBAPP) const;
           response likeds(RPGWEBRSP) const;
@@ -114,6 +126,12 @@
         dcl-pr RPGWEB_setRoute;
           config likeds(RPGWEBAPP);
           method char(10) const;
+          url varchar(32000) const;
+          procedure pointer(*proc) const;
+        end-pr;
+
+        dcl-pr RPGWEB_setMiddleware;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;

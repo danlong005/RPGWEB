@@ -9,8 +9,9 @@
        dcl-ds app likeds(RPGWEBAPP);
 
        clear app;
-       app.port = 3017;
+       app.port = 3012;
 
+       RPGWEB_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
        RPGWEB_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
 
        RPGWEB_start(app);
@@ -18,6 +19,15 @@
        *inlr = *on;
        return;
 
+
+       dcl-proc CHECK_AUTH;
+         dcl-pi *n ind;
+           request likeds(RPGWEBRQST) const;
+           response likeds(RPGWEBRSP) const;
+         end-pi;
+
+         return *on;
+       end-proc;
 
        dcl-proc MBR_show;
          dcl-pi *n likeds(RPGWEBRSP);

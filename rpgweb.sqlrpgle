@@ -6,9 +6,11 @@
               config likeds(RPGWEBAPP);
             end-pi;
             dcl-s index int(10:0) inz;
+            dcl-s index2 int(10:0) inz;
             dcl-s route_found ind inz;
             dcl-ds response likeds(RPGWEBRSP) inz;
             dcl-ds request likeds(RPGWEBRQST) inz;
+            dcl-s middleware_completed ind;
 
             RPGWEB_setup(config);
 
@@ -20,10 +22,36 @@
                 clear response;
                 clear route_found;
                 for index = 1 to %elem(config.routes) by 1;
-                  if RPGWEB_routeMatches(config.routes(index) : request);
-                    RPGWEB_callback_ptr = config.routes(index).procedure;
-                    response = RPGWEB_callback(request);
-                    route_found = *on;
+                  middleware_completed = *on;
+
+                  for index2 = 1 to %elem(config.middlewares) by 1;
+                    if middleware_completed and 
+                      RPGWEB_mwMatches(config.middlewares(index2) : request);
+                      
+                      if config.middlewares(index2).url = *blanks;
+                        index2 = %elem(config.middlewares) + 1;
+                        iter;
+                      endif;
+
+                      RPGWEB_mwCallback_ptr = 
+                        config.middlewares(index2).procedure;
+                      middleware_completed = 
+                        RPGWEB_mwCallback(request : response);
+
+                      if middleware_completed = *off;
+                        index2 = %elem(config.middlewares) + 1;
+                      endif;
+                    endif;
+                  endfor;
+
+                  if middleware_completed = *on;
+                    if RPGWEB_routeMatches(config.routes(index) : request);
+                      RPGWEB_callback_ptr = config.routes(index).procedure;
+                      response = RPGWEB_callback(request);
+                      route_found = *on;
+                      index = %elem(config.routes) + 1;
+                    endif;
+                  else;
                     index = %elem(config.routes) + 1;
                   endif;
                 endfor;
@@ -290,6 +318,68 @@
           end-proc;
 
 
+          dcl-proc RPGWEB_mwMatches export;
+            dcl-pi *n ind;
+              route likeds(RPGWEB_route_ds);
+              request likeds(RPGWEBRQST);
+            end-pi;
+            dcl-s position int(10:0);
+            dcl-s url varchar(32000);
+            dcl-s start int(10:0);
+            dcl-s new_start int(10:0);
+            dcl-s stop int(10:0);
+            dcl-s quit ind inz;
+            dcl-s index int(10:0);
+            dcl-s route_comparison varchar(32000);
+
+            clear request.params;
+            url = request.route;
+            route_comparison = route.url;
+
+            start = 0;
+            new_start = 1;
+            quit = *off;
+            dow not quit;
+              start = %scan('{' : route_comparison);
+              if start > 0;
+                stop = %scan('}' : route_comparison : start);
+
+                for index = 1 to %elem(request.params) by 1;
+                  if request.params(index).name = *blanks;
+                    request.params(index).name = %subst( route_comparison :
+                                                        start + 1 :
+                                                        stop - start - 1 );
+                    stop = %scan('/' : request.route : start + 1);
+                    if stop = 0;
+                      request.params(index).value = %subst( request.route :
+                                                            start);
+                    else;
+                      request.params(index).value = %subst( request.route :
+                                                            start :
+                                                            stop - start);
+                    endif;
+
+                    route_comparison = %scanrpl('{' + 
+                              %trim(request.params(index).name) + '}' : 
+                              %trim(request.params(index).value) :
+                              route_comparison );
+                    index = %elem(request.params) + 1;
+                  endif;
+                endfor;
+              else;
+                quit = *on;
+              endif;
+            enddo;
+
+            position = 0;
+            exec sql set :position = regexp_instr(:url, :route_comparison);
+
+            return position > 0;
+          end-proc;
+
+
+
+
 
           dcl-proc RPGWEB_sendResponse export;
             dcl-pi *n;
@@ -395,6 +485,23 @@
             endfor;
           end-proc;
 
+
+          dcl-proc RPGWEB_setMiddleware export;
+            dcl-pi *n;
+              config likeds(RPGWEBAPP);
+              url varchar(32000) const;
+              procedure pointer(*proc) const;
+            end-pi;
+            dcl-s index int(10:0) inz;
+
+            for index = 1 to %elem(config.middlewares) by 1;
+              if config.middlewares(index).url = *blanks;
+                config.middlewares(index).url = url;
+                config.middlewares(index).procedure = procedure;
+                index = %elem(config.middlewares) + 1;
+              endif;
+            endfor;
+          end-proc;
 
 
           dcl-proc RPGWEB_get export;

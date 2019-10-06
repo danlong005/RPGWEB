@@ -106,10 +106,28 @@ We find that these make the code _MUCH_ more readable.
 
 
 ### Middleware
-Currently we do not yet support middleware. That is coming soon though. Please check back.
+To create middleware on your routes you can use the following method.
 
+```
+  RPGWEB_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
+```
 
+and the defintion of the middleware callback is as follows
 
+```
+  dcl-proc CHECK_AUTH;
+    dcl-pi *n ind;
+      request likeds(RPGWEBRQST) const;
+      response likeds(RPGWEBRSP) const;
+    end-pi;
+
+    return *on;
+  end-proc;
+```
+
+If you want to continue the request after the middleware method has ran then 
+return *on, else you can return *off and the request will be cancelled. You of 
+course will need to set the response accordingly in the middleware.
 
 
 ### Requests
