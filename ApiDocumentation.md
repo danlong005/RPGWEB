@@ -1,6 +1,57 @@
 # RPGWEB Documentation
 
-## Application Data Structure
+### Application Data Structures
+```
+        //
+        // the request data structure
+        //
+        dcl-ds RPGWEBRQST qualified template;
+          body varchar(32000);
+          headers likeds(RPGWEB_header_ds) dim(100);
+          hostname char(250);
+          method char(10);
+          params likeds(RPGWEB_param_ds) dim(100);
+          protocol char(250);
+          query_params likeds(RPGWEB_param_ds) dim(100);
+          query_string char(1024);
+          route char(250);
+        end-ds;
+
+        //
+        // the response data structure
+        //
+        dcl-ds RPGWEBRSP qualified template;
+          body varchar(32000);
+          headers likeds(RPGWEB_header_ds) dim(100);
+          status int(10:0);
+        end-ds;
+
+        //
+        // the application data structure
+        //
+        dcl-ds RPGWEBAPP qualified template;
+          port int(10:0);
+          socket_descriptor int(10:0);
+          return_socket_descriptor int(10:0);
+          routes likeds(RPGWEB_route_ds) dim(500);
+        end-ds;
+
+        dcl-ds RPGWEB_header_ds qualified template;
+          name char(50);
+          value varchar(1024);
+        end-ds;
+
+        dcl-ds RPGWEB_param_ds qualified template;
+          name char(50);
+          value varchar(1024);
+        end-ds;
+
+        dcl-ds RPGWEB_route_ds qualified template;
+          method char(10);
+          url varchar(32000);
+          procedure pointer(*proc);
+        end-ds;
+```
 
 ### Application
 For a simple application to get you up and running checkout our [Quick Start](QuickStart.md) guide. This will get you up and running with a RPG web application in no time.
@@ -71,7 +122,6 @@ These are the headers that came in on the request. You can access those headers 
 header_value = RPGWEB_getHeader(request : 'Content-Type');
 ```
 
-
 #### Params
 These are the route params that came in on the request. To define route params in your route see the section on routing. You can access the params using the following api method
 
@@ -79,18 +129,55 @@ These are the route params that came in on the request. To define route params i
 id_value = RPGWEB_getParam(request : 'id');
 ```
 
-
 #### Body
+To access the body of the request you can use the following variable in the 
+request data structure.
 
-#### Status
+```
+body_value = request.body;
+```
 
 #### QueryString/QueryParams
+The query string can be accessed in two different ways.
+
+First you can get they full query string by access the query_string variable 
+in the request data structure
+
+```
+query_string_value = request.query_string;
+```
+
+or you can access the various values in the query string using the following
+method
+
+```
+query_string_param = RPGWEB_getQueryParam(request : 'q');
+```
+Note: q would be the param name in the query string like `q=fish`
+
 
 #### Protocol
+The protocol that the request used can be accessed using the following variable 
+on the request data structure.
+
+```
+protocol = request.protocol;
+```
 
 #### Method
+The method that the request used can be accessed using the following variable 
+on the request data structure.
+
+```
+method = request.method;
+```
 
 #### Route
+The route that the request used can be accessed using the following variable 
+on the request data structure.
 
+```
+route = request.route;
+```
 
 ### Responses

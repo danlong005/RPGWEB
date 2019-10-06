@@ -81,6 +81,11 @@
           param char(50) const;
         end-pr;
 
+        dcl-pr RPGWEB_getQueryParam varchar(1024);
+          request likeds(RPGWEBRQST) const;
+          param char(50) const;
+        end-pr;
+
         dcl-pr RPGWEB_getHeader varchar(1024);
           request likeds(RPGWEBRQST) const;
           header char(50) const;
@@ -273,7 +278,7 @@
      D  reserved2                   150A
 
        dcl-c AF_UNIX 1;
-       dcl-c AF_INEXT 2;
+       dcl-c AF_INET 2;
        dcl-c AF_NS 6;
        dcl-c AF_TELEPHONY 99;
        dcl-c SOCK_STREAM 1;

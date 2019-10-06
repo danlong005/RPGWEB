@@ -168,6 +168,26 @@
           end-proc;
 
 
+          dcl-proc RPGWEB_getQueryParam export;
+            dcl-pi *n varchar(1024);
+              request likeds(RPGWEBRQST) const;
+              param char(50) const;
+            end-pi;
+            dcl-s param_value varchar(1024);
+            dcl-s index int(10:0);
+
+            clear param_value;
+            for index = 1 to %elem(request.query_params) by 1;
+              if RPGWEB_toUpper(request.query_params(index).name) =
+                RPGWEB_toUpper(param);
+                param_value = request.query_params(index).value;
+                index = %elem(request.query_params) + 1;
+              endif;
+            endfor;
+
+            return %trim(param_value);
+          end-proc;
+
 
           dcl-proc RPGWEB_getHeader export;
             dcl-pi *n varchar(1024);
