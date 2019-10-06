@@ -6,7 +6,7 @@
 
        dcl-ds request likeds(RPGWEBRQST);
        dcl-ds response likeds(RPGWEBRSP);
-       dcl-ds app likeds(RPGWEBCFG);
+       dcl-ds app likeds(RPGWEBAPP);
 
        clear app;
        app.port = 3017;
