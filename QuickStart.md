@@ -1,32 +1,32 @@
 ```
-       ctl-opt option(*nodebugio:*srcstmt) bnddir('RPGWEB')
+       ctl-opt option(*nodebugio:*srcstmt) bnddir('RPGAPI')
               dftactgrp(*no);
 
-      /copy rpgweb/qrpglesrc,RPGWEB_H
+      /copy RPGAPI/qrpglesrc,RPGAPI_H
 
-       dcl-ds request likeds(RPGWEBRQST);
-       dcl-ds response likeds(RPGWEBRSP);
-       dcl-ds app likeds(RPGWEBAPP);
+       dcl-ds request likeds(RPGAPIRQST);
+       dcl-ds response likeds(RPGAPIRSP);
+       dcl-ds app likeds(RPGAPIAPP);
 
        clear app;
        app.port = 3017;
 
-       RPGWEB_get(app : '/hello' : %paddr(test_proc));
+       RPGAPI_get(app : '/hello' : %paddr(test_proc));
 
-       RPGWEB_start(app);
+       RPGAPI_start(app);
 
        *inlr = *on;
        return;
 
 
        dcl-proc test_proc;
-         dcl-pi *n likeds(RPGWEBRSP);
-           request likeds(RPGWEBRQST) const;
+         dcl-pi *n likeds(RPGAPIRSP);
+           request likeds(RPGAPIRQST) const;
          end-pi;
 
          response.body = 'hello';
          response.status = HTTP_OK;
-         RPGWEB_setHeader(response : 'Content-Type' : 'application/text');
+         RPGAPI_setHeader(response : 'Content-Type' : 'application/text');
 
          return response;
        end-proc;

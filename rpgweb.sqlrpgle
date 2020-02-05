@@ -1,23 +1,23 @@
           ctl-opt option(*nodebugio:*srcstmt) nomain;
-          /include RPGWEB/QRPGLESRC,RPGWEB_H
+          /include RPGAPI/QRPGLESRC,RPGAPI_H
 
-          dcl-proc RPGWEB_start export;
+          dcl-proc RPGAPI_start export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
             end-pi;
             dcl-s index int(10:0) inz;
             dcl-s index2 int(10:0) inz;
             dcl-s route_found ind inz;
-            dcl-ds response likeds(RPGWEBRSP) inz;
-            dcl-ds request likeds(RPGWEBRQST) inz;
+            dcl-ds response likeds(RPGAPIRSP) inz;
+            dcl-ds request likeds(RPGAPIRQST) inz;
             dcl-s middleware_completed ind;
 
-            RPGWEB_setup(config);
+            RPGAPI_setup(config);
 
             dow 1 = 1;
               monitor;
                 clear request;
-                request = RPGWEB_acceptRequest(config);
+                request = RPGAPI_acceptRequest(config);
 
                 clear response;
                 clear route_found;
@@ -26,17 +26,17 @@
 
                   for index2 = 1 to %elem(config.middlewares) by 1;
                     if middleware_completed and 
-                      RPGWEB_mwMatches(config.middlewares(index2) : request);
+                      RPGAPI_mwMatches(config.middlewares(index2) : request);
                       
                       if config.middlewares(index2).url = *blanks;
                         index2 = %elem(config.middlewares) + 1;
                         iter;
                       endif;
 
-                      RPGWEB_mwCallback_ptr = 
+                      RPGAPI_mwCallback_ptr = 
                         config.middlewares(index2).procedure;
                       middleware_completed = 
-                        RPGWEB_mwCallback(request : response);
+                        RPGAPI_mwCallback(request : response);
 
                       if middleware_completed = *off;
                         index2 = %elem(config.middlewares) + 1;
@@ -45,9 +45,9 @@
                   endfor;
 
                   if middleware_completed = *on;
-                    if RPGWEB_routeMatches(config.routes(index) : request);
-                      RPGWEB_callback_ptr = config.routes(index).procedure;
-                      response = RPGWEB_callback(request);
+                    if RPGAPI_routeMatches(config.routes(index) : request);
+                      RPGAPI_callback_ptr = config.routes(index).procedure;
+                      response = RPGAPI_callback(request);
                       route_found = *on;
                       index = %elem(config.routes) + 1;
                     endif;
@@ -57,23 +57,23 @@
                 endfor;
                 
                 if not route_found;
-                  response = RPGWEB_setResponse(request :  HTTP_NOT_FOUND);
+                  response = RPGAPI_setResponse(request :  HTTP_NOT_FOUND);
                 endif;
 
-                RPGWEB_sendResponse(config : response);
+                RPGAPI_sendResponse(config : response);
               on-error;
-                response = RPGWEB_setResponse(request :  HTTP_INTERNAL_SERVER);
+                response = RPGAPI_setResponse(request :  HTTP_INTERNAL_SERVER);
               endmon;
             enddo;
 
-            RPGWEB_stop(config);
+            RPGAPI_stop(config);
           end-proc;
 
 
 
-          dcl-proc RPGWEB_stop export;
+          dcl-proc RPGAPI_stop export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP) const;
+              config likeds(RPGAPIAPP) const;
             end-pi;
 
             close_port( config.return_socket_descriptor );
@@ -82,9 +82,9 @@
 
 
 
-          dcl-proc RPGWEB_acceptRequest export;
-            dcl-pi *n likeds(RPGWEBRQST);
-              config likeds(RPGWEBAPP);
+          dcl-proc RPGAPI_acceptRequest export;
+            dcl-pi *n likeds(RPGAPIRQST);
+              config likeds(RPGAPIAPP);
             end-pi;
             dcl-ds socket_address likeds(socketaddr);
             dcl-s data char(32766);
@@ -101,17 +101,17 @@
                                 %addr(data) :
                                 %size(data) );
 
-            RPGWEB_translate( %len(%trim(data)) : data : 'QTCPEBC');
-            return RPGWEB_parse(data);
+            RPGAPI_translate( %len(%trim(data)) : data : 'QTCPEBC');
+            return RPGAPI_parse(data);
           end-proc;
 
 
 
-          dcl-proc RPGWEB_parse;
-            dcl-pi *n likeds(RPGWEBRQST);
+          dcl-proc RPGAPI_parse;
+            dcl-pi *n likeds(RPGAPIRQST);
               raw_request varchar(32000) const;
             end-pi;
-            dcl-ds request likeds(RPGWEBRQST);
+            dcl-ds request likeds(RPGAPIRQST);
             dcl-s line char(1024);
             dcl-s start int(10:0);
             dcl-s stop int(10:0);
@@ -122,12 +122,12 @@
             dcl-s index int(10:0);
 
             clear request;
-            position = %scan(RPGWEB_CRLF : raw_request);
+            position = %scan(RPGAPI_CRLF : raw_request);
             start = 1;
             stop = position;
             line = %subst(raw_request:start:stop);
 
-            parts = RPGWEB_split(line : ' ');
+            parts = RPGAPI_split(line : ' ');
             request.method = parts(1);
             request.route = parts(2);
             request.protocol = parts(3);
@@ -137,14 +137,14 @@
 
             if start > 0;
               request.query_string =
-                    RPGWEB_cleanString(%subst(request.route : start + 1));
+                    RPGAPI_cleanString(%subst(request.route : start + 1));
               request.route = %subst(request.route : 1 : start - 1);
             endif;
 
-            parts = RPGWEB_split(request.query_string : '&');
+            parts = RPGAPI_split(request.query_string : '&');
             for index = 1 to %elem(parts) by 1;
               if parts(index) <> *blanks;
-                pieces = RPGWEB_split(parts(index) : '=');
+                pieces = RPGAPI_split(parts(index) : '=');
                 request.query_params(index).name = pieces(1);
                 request.query_params(index).value = %trim(pieces(2));
               else;
@@ -153,13 +153,13 @@
             endfor;
 
             start = stop + 1;
-            stop = %scan(RPGWEB_DBL_CRLF : raw_request);
+            stop = %scan(RPGAPI_DBL_CRLF : raw_request);
             raw_headers = %subst(raw_request : start : stop - start);
-            parts = RPGWEB_split(raw_headers : RPGWEB_CRLF);
+            parts = RPGAPI_split(raw_headers : RPGAPI_CRLF);
 
             for index = 1 to %elem(parts) by 1;
               if parts(index) <> *blanks;
-                pieces = RPGWEB_split(parts(index) : ':');
+                pieces = RPGAPI_split(parts(index) : ':');
                 request.headers(index).name = pieces(1);
                 request.headers(index).value = %trim(pieces(2));
               else;
@@ -168,16 +168,16 @@
             endfor;
 
             start = stop + 1;
-            request.body = RPGWEB_cleanString(%subst(raw_request : start ));
+            request.body = RPGAPI_cleanString(%subst(raw_request : start ));
 
             return request;
           end-proc;
         
 
 
-          dcl-proc RPGWEB_getParam export;
+          dcl-proc RPGAPI_getParam export;
             dcl-pi *n varchar(1024);
-              request likeds(RPGWEBRQST) const;
+              request likeds(RPGAPIRQST) const;
               param char(50) const;
             end-pi;
             dcl-s param_value varchar(1024);
@@ -185,8 +185,8 @@
 
             clear param_value;
             for index = 1 to %elem(request.params) by 1;
-              if RPGWEB_toUpper(request.params(index).name) =
-                RPGWEB_toUpper(param);
+              if RPGAPI_toUpper(request.params(index).name) =
+                RPGAPI_toUpper(param);
                 param_value = request.params(index).value;
                 index = %elem(request.params) + 1;
               endif;
@@ -196,9 +196,9 @@
           end-proc;
 
 
-          dcl-proc RPGWEB_getQueryParam export;
+          dcl-proc RPGAPI_getQueryParam export;
             dcl-pi *n varchar(1024);
-              request likeds(RPGWEBRQST) const;
+              request likeds(RPGAPIRQST) const;
               param char(50) const;
             end-pi;
             dcl-s param_value varchar(1024);
@@ -206,8 +206,8 @@
 
             clear param_value;
             for index = 1 to %elem(request.query_params) by 1;
-              if RPGWEB_toUpper(request.query_params(index).name) =
-                RPGWEB_toUpper(param);
+              if RPGAPI_toUpper(request.query_params(index).name) =
+                RPGAPI_toUpper(param);
                 param_value = request.query_params(index).value;
                 index = %elem(request.query_params) + 1;
               endif;
@@ -217,9 +217,9 @@
           end-proc;
 
 
-          dcl-proc RPGWEB_getHeader export;
+          dcl-proc RPGAPI_getHeader export;
             dcl-pi *n varchar(1024);
-              request likeds(RPGWEBRQST) const;
+              request likeds(RPGAPIRQST) const;
               header char(50) const;
             end-pi;
             dcl-s header_value varchar(1024);
@@ -227,8 +227,8 @@
 
             clear header_value;
             for index = 1 to %elem(request.headers) by 1;
-              if RPGWEB_toUpper(request.headers(index).name) =
-                RPGWEB_toUpper(header);
+              if RPGAPI_toUpper(request.headers(index).name) =
+                RPGAPI_toUpper(header);
                 header_value = request.headers(index).value;
                 index = %elem(request.headers) + 1;
               endif;
@@ -239,9 +239,9 @@
 
 
 
-          dcl-proc RPGWEB_setHeader export;
+          dcl-proc RPGAPI_setHeader export;
             dcl-pi *n;
-              response likeds(RPGWEBRSP);
+              response likeds(RPGAPIRSP);
               header_name char(50) const;
               header_value varchar(1024) const;
             end-pi;
@@ -258,10 +258,10 @@
 
 
 
-          dcl-proc RPGWEB_routeMatches export;
+          dcl-proc RPGAPI_routeMatches export;
             dcl-pi *n ind;
-              route likeds(RPGWEB_route_ds);
-              request likeds(RPGWEBRQST);
+              route likeds(RPGAPI_route_ds);
+              request likeds(RPGAPIRQST);
             end-pi;
             dcl-s position int(10:0);
             dcl-s url varchar(32000);
@@ -318,10 +318,10 @@
           end-proc;
 
 
-          dcl-proc RPGWEB_mwMatches export;
+          dcl-proc RPGAPI_mwMatches export;
             dcl-pi *n ind;
-              route likeds(RPGWEB_route_ds);
-              request likeds(RPGWEBRQST);
+              route likeds(RPGAPI_route_ds);
+              request likeds(RPGAPIRQST);
             end-pi;
             dcl-s position int(10:0);
             dcl-s url varchar(32000);
@@ -381,25 +381,25 @@
 
 
 
-          dcl-proc RPGWEB_sendResponse export;
+          dcl-proc RPGAPI_sendResponse export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP) const;
-              response likeds(RPGWEBRSP) const;
+              config likeds(RPGAPIAPP) const;
+              response likeds(RPGAPIRSP) const;
             end-pi;
             dcl-s data char(32766);
             dcl-s return_code int(10:0) inz(0);
             dcl-s index int(10:0) inz;
 
             data = 'HTTP/1.1 ' + %char(response.status) + ' ' +
-                  %trim(RPGWEB_getMessage(response.status)) + RPGWEB_CRLF;
-            data = %trim(data) + 'Connection: close' + RPGWEB_CRLF;
+                  %trim(RPGAPI_getMessage(response.status)) + RPGAPI_CRLF;
+            data = %trim(data) + 'Connection: close' + RPGAPI_CRLF;
 
             for index = 1 to %elem(response.headers) by 1;
               if response.headers(index).name <> *blanks;
                 data = %trim(data) +
                               %trim(response.headers(index).name) + ': ' +
                               %trim(response.headers(index).value) + 
-                              RPGWEB_CRLF;
+                              RPGAPI_CRLF;
               else;
                 index = %elem(response.headers) + 1;
               endif;
@@ -407,16 +407,16 @@
 
             if %len(%trim(response.body)) > 0;
               data = %trim(data) + 'Content-Length: ' +
-                    %char(%len(%trim(data) + RPGWEB_DBL_CRLF + 
-                    %trim(response.body))) + RPGWEB_CRLF;
+                    %char(%len(%trim(data) + RPGAPI_DBL_CRLF + 
+                    %trim(response.body))) + RPGAPI_CRLF;
 
-              data = %trim(data) + RPGWEB_DBL_CRLF + %trim(response.body);
+              data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
             else;
               data = %trim(data) + 'Content-Length: ' +
-                    %char(%len(%trim(data))) + RPGWEB_DBL_CRLF;
+                    %char(%len(%trim(data))) + RPGAPI_DBL_CRLF;
             endif;
 
-            RPGWEB_translate( %len(%trim(data)) : data : 'QTCPASC');
+            RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
 
             return_code = write( config.return_socket_descriptor :
                                 %addr(data) :
@@ -426,9 +426,9 @@
 
 
 
-          dcl-proc RPGWEB_setup;
+          dcl-proc RPGAPI_setup;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
             end-pi;
             dcl-s return_code int(10:0) inz(0);
             dcl-ds socket_address likeds(socketaddr);
@@ -466,9 +466,9 @@
 
 
 
-          dcl-proc RPGWEB_setRoute export;
+          dcl-proc RPGAPI_setRoute export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
               method char(10) const;
               url varchar(32000) const;
               procedure pointer(*proc) const;
@@ -486,9 +486,9 @@
           end-proc;
 
 
-          dcl-proc RPGWEB_setMiddleware export;
+          dcl-proc RPGAPI_setMiddleware export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
@@ -504,71 +504,71 @@
           end-proc;
 
 
-          dcl-proc RPGWEB_get export;
+          dcl-proc RPGAPI_get export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
 
-            RPGWEB_setRoute(config: HTTP_GET : url : procedure);
+            RPGAPI_setRoute(config: HTTP_GET : url : procedure);
           end-proc;
 
 
 
-          dcl-proc RPGWEB_put export;
+          dcl-proc RPGAPI_put export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
 
-            RPGWEB_setRoute(config: HTTP_PUT : url : procedure);
+            RPGAPI_setRoute(config: HTTP_PUT : url : procedure);
           end-proc;
 
 
 
-          dcl-proc RPGWEB_post export;
+          dcl-proc RPGAPI_post export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
 
-            RPGWEB_setRoute(config: HTTP_POST : url : procedure);
+            RPGAPI_setRoute(config: HTTP_POST : url : procedure);
           end-proc;
 
 
 
-          dcl-proc RPGWEB_delete export;
+          dcl-proc RPGAPI_delete export;
             dcl-pi *n;
-              config likeds(RPGWEBAPP);
+              config likeds(RPGAPIAPP);
               url varchar(32000) const;
               procedure pointer(*proc) const;
             end-pi;
 
-            RPGWEB_setRoute(config: HTTP_DELETE : url : procedure);
+            RPGAPI_setRoute(config: HTTP_DELETE : url : procedure);
           end-proc;
 
 
 
-          dcl-proc RPGWEB_setResponse;
-            dcl-pi *n likeds(RPGWEBRSP);
-              request likeds(RPGWEBRQST);
+          dcl-proc RPGAPI_setResponse;
+            dcl-pi *n likeds(RPGAPIRSP);
+              request likeds(RPGAPIRQST);
               status zoned(3:0) const;
             end-pi;
-            dcl-ds response likeds(RPGWEBRSP) inz;
+            dcl-ds response likeds(RPGAPIRSP) inz;
 
             clear response;
             response.status = status;
-            RPGWEB_setHeader(response : 'Connection' : 'Close');
+            RPGAPI_setHeader(response : 'Connection' : 'Close');
           
             return response;
           end-proc;
 
 
 
-          dcl-proc RPGWEB_toUpper;
+          dcl-proc RPGAPI_toUpper;
             dcl-pi *n varchar(32000);
               param varchar(32000) const;
             end-pi;
@@ -581,7 +581,7 @@
 
 
 
-          dcl-proc RPGWEB_split;
+          dcl-proc RPGAPI_split;
             dcl-pi *n char(1024) dim(50);
               line varchar(32000) const;
               delimiter char(1) const;
@@ -605,7 +605,7 @@
                         stop = %len(%trim(line)) + 1;
                     endif;
                     parts(index) =
-                      RPGWEB_cleanString(%subst(line:start:stop-start));
+                      RPGAPI_cleanString(%subst(line:start:stop-start));
                 else;
                     index = 49;
                 endif;
@@ -618,21 +618,21 @@
 
 
 
-          dcl-proc RPGWEB_cleanString;
+          dcl-proc RPGAPI_cleanString;
             dcl-pi *n varchar(32000);
               dirty_string varchar(32000) const;
             end-pi;
             dcl-s cleaned_string varchar(32000);
 
             cleaned_string =
-              %trim(%scanrpl(RPGWEB_CR : '' : 
-                        %scanrpl(RPGWEB_LF : '' : dirty_string)));
+              %trim(%scanrpl(RPGAPI_CR : '' : 
+                        %scanrpl(RPGAPI_LF : '' : dirty_string)));
             return cleaned_string;
           end-proc;
 
 
 
-          dcl-proc RPGWEB_getMessage;
+          dcl-proc RPGAPI_getMessage;
             dcl-pi *n char(25);
               status zoned(3:0) const;
             end-pi;
