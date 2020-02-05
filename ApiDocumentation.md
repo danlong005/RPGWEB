@@ -199,3 +199,34 @@ route = request.route;
 ```
 
 ### Responses
+The response object is something you will create in the callback methods. Inside the callback method you will define the response and return it from your callback. 
+```
+  dcl-ds response likeds(RPGAPIRSP);
+
+  return response;
+```
+
+#### Headers
+You can set response headers very easily. The following is an example. 
+
+```
+RPGAPI_getHeader(response : 'Connection' : 'close');
+```
+
+#### Body
+Setting the body of the response can be done like so.
+
+```
+response.body = 'Here is the body!';
+```
+
+#### Status
+Once again setting the status is a simple thing to to do.
+
+```
+response.status = 200;
+
+// some http codes are mapped into constants. We are working to map more of them.
+response.status = HTTP_OK;      // 200
+response.status = HTTP_CREATED; // 201
+```
