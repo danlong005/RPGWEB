@@ -7,6 +7,7 @@
         dcl-c RPGAPI_CR x'25';
         dcl-c RPGAPI_CRLF x'0d25';
         dcl-c RPGAPI_DBL_CRLF x'0d250d25';
+        dcl-c RPGAPI_GLOBAL_MIDDLEWARE '*';
 
         dcl-ds HTTP_messages qualified dim(100);
           status zoned(3:0);

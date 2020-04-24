@@ -11,6 +11,10 @@
        clear app;
        app.port = 3012;
 
+       // adding a middleware to all routes
+       RPGAPI_setMiddleware(app: RPGAPI_GLOBAL_MIDDLEWARE: %paddr(CHECK_AUTH));
+
+       // adding a middle ware to a specific route
        RPGAPI_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
        RPGAPI_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
 

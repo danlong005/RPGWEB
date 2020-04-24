@@ -374,6 +374,11 @@
             position = 0;
             exec sql set :position = regexp_instr(:url, :route_comparison);
 
+            // allowing middlewares for all routes
+            if (route_comparison = RPGAPI_GLOBAL_MIDDLEWARE) }
+              position = 1;
+            endif;
+
             return position > 0;
           end-proc;
 
