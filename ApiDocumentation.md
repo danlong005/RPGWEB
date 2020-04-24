@@ -106,6 +106,22 @@ We find that these make the code _MUCH_ more readable.
 
 
 ### Middleware
+
+#### Global Middleware 
+For global middleware you can create do the following.
+
+```
+  RPGAPI_setMiddleware(app: RPGAPI_GLOBAL_MIDDLEWARE: %paddr(CHECK_AUTH));
+```
+or
+```
+  RPGAPI_setMiddleware(app: '*': %paddr(CHECK_AUTH));
+```
+if you don't want to type the constant name.
+
+
+#### Route Middleware
+
 To create middleware on your routes you can use the following method.
 
 ```
