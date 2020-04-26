@@ -266,33 +266,33 @@
      D   sin_zero                     8A   inz(*ALLX'00')
 
      D SocketAddrLen   s             10I 0
-     D SocketAddrLen@  s               *   inz(%addr(SocketAddrLen))
+     D SocketAddrLena  s               *   inz(%addr(SocketAddrLen))
 
-     D HostEnt@        s               *
+     D HostEnta        s               *
 
-     D HostEnt         ds                  align based(HostEnt@)
-     D  h_name@                        *
-     D  h_aliases@                     *
+     D HostEnt         ds                  align based(HostEnta)
+     D  h_namea                        *
+     D  h_aliasesa                     *
      D  h_addrtype                   10I 0
      D  h_len                        10I 0
-     D  h_addr_list@                   *
+     D  h_addr_lista                   *
 
-     D HostEntData@    s               *
+     D HostEntDataa    s               *
 
-     D HostEntData     ds                  align based(HostEntData@)
+     D HostEntData     ds                  align based(HostEntDataa)
      D  h_name                      256A
-     D  h_aliases2@                    *   dim(65)
+     D  h_aliases2a                    *   dim(65)
      D  h_aliases2                  256A   dim(64)
-     D  h_addr@                        *   dim(101)
+     D  h_addra                        *   dim(101)
      D  h_addr                       10U 0 dim(100)
      D  open_flag                    10I 0
-     D  f0@                            *
+     D  f0a                            *
      D  filep0                      260A
      D  reserved0                   150A
-     D  f1@                            *
+     D  f1a                            *
      D  filep1                      260A
      D  reserved1                   150A
-     D  f2@                            *
+     D  f2a                            *
      D  filep2                      260A
      D  reserved2                   150A
 

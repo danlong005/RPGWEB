@@ -96,7 +96,7 @@
             socket_address.sin_addr = INADDR_ANY;
             config.return_socket_descriptor = accept( config.socket_descriptor :
                                   %addr(socket_address) :
-                                  socketaddrlen@ );
+                                  socketaddrlena );
             return_code = read( config.return_socket_descriptor :
                                 %addr(data) :
                                 %size(data) );
