@@ -56,7 +56,7 @@
                   endif;
                 endfor;
                 
-                if not route_found;
+                if not route_found and middleware_completed = *on;
                   response = RPGAPI_setResponse(request :  HTTP_NOT_FOUND);
                 endif;
 
