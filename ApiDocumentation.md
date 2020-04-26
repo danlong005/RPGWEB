@@ -134,7 +134,7 @@ and the defintion of the middleware callback is as follows
   dcl-proc CHECK_AUTH;
     dcl-pi *n ind;
       request likeds(RPGAPIRQST) const;
-      response likeds(RPGAPIRSP) const;
+      response likeds(RPGAPIRSP);
     end-pi;
 
     return *on;

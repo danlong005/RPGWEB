@@ -65,7 +65,7 @@
         dcl-s RPGAPI_mwCallback_ptr pointer(*proc);
         dcl-pr RPGAPI_mwCallback ind extproc(RPGAPI_mwCallback_ptr);
           request likeds(RPGAPIRQST) const;
-          response likeds(RPGAPIRSP) const;
+          response likeds(RPGAPIRSP);
         end-pr;
 
         dcl-pr RPGAPI_start;
