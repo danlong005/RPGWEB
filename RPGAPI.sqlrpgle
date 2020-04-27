@@ -4,6 +4,7 @@
           dcl-proc RPGAPI_start export;
             dcl-pi *n;
               config likeds(RPGAPIAPP);
+              port int(10:0) options(*nopass);
             end-pi;
             dcl-s index int(10:0) inz;
             dcl-s index2 int(10:0) inz;
@@ -11,6 +12,12 @@
             dcl-ds response likeds(RPGAPIRSP) inz;
             dcl-ds request likeds(RPGAPIRQST) inz;
             dcl-s middleware_completed ind;
+
+            if config.port = 0 and %params < 2;
+              config.port = 3000;
+            elseif %params = 2
+              config.port = port;
+            endif;
 
             RPGAPI_setup(config);
 

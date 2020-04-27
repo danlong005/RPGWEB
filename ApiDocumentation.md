@@ -30,7 +30,7 @@
         // the application data structure
         //
         dcl-ds RPGAPIAPP qualified template;
-          port int(10:0);
+          port int(10:0);                          // default is 3000
           socket_descriptor int(10:0);
           return_socket_descriptor int(10:0);
           routes likeds(RPGAPI_route_ds) dim(500);
