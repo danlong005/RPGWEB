@@ -15,7 +15,7 @@
 
             if config.port = 0 and %parms < 2;
               config.port = 3000;
-            elseif %parms = 2
+            elseif %parms = 2;
               config.port = port;
             endif;
 
