@@ -9,11 +9,10 @@
        dcl-ds app likeds(RPGAPIAPP);
 
        clear app;
-       app.port = 3017;  // default is 3000
 
        RPGAPI_get(app : '/hello' : %paddr(test_proc));
 
-       RPGAPI_start(app);
+       RPGAPI_start(app: 3017);
 
        *inlr = *on;
        return;

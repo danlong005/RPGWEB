@@ -80,6 +80,17 @@ Once you have registered some routes in the app data structure you can start the
 RPGAPI_start(app);
 ```
 
+or add the port on the start command
+```
+RPGAPI_start(app: 3000);
+```
+
+or configure the port via the app
+```
+app.port = 3000;
+RPGAPI_start(app);
+```
+_NOTE:_ The default port is 3000.
 
 
 #### Routing
@@ -103,7 +114,22 @@ RPGAPI_delete(app : url : %paddr(procedure));
 We find that these make the code _MUCH_ more readable.
 
 ##### Defining Routes
+For route params you can define routes in the following way
+```
+RPGAPI_get(app: '/v1/things/{id}': %paddr(procedure));
+```
+Now there will be a route param of id that will be available to you in the produre that is ran when this route is matched. 
 
+You can gain access to that param using the following code. This will be a string value. Convert it as needed. 
+```
+RPGAPI_getParam(request: 'id');
+```
+
+When defining routes it is the same as other api frameworks. Define specific routes before more general routes.
+```
+RPGAPI_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
+RPGAPI_get(app : '/api/v1/memberships' : %paddr(MBR_index));
+```
 
 ### Middleware
 
