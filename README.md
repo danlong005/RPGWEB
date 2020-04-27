@@ -17,6 +17,14 @@ QSYS/CRTBNDCL PGM([YOURLIB]/BUILD)
               DBGVIEW(*SOURCE)                         
 ```
 
+If you cannot compile CL's from the IFS on your machine, use the following command to copy the build program to a source member. Then use the CHGPFM command to make it a CL. Then compile as normal.
+```
+CPYFRMSTMF FROMSTMF('/downloaded/location/RPGAPI/BUILD.CLLE')
+           TOMBR('/QSYS.LIB/[YOURLIB].LIB/QCLSRC.FILE/BUILD.MBR')
+
+CHGPFM FILE([YOURLIB]/QCLSRC) MBR(BUILD) SRCTYPE(CLLE)
+```
+
 Then you can run the build script to create the RPGAPI library, and all of the 
 programs, and include files.
 ```
