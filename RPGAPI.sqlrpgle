@@ -13,9 +13,9 @@
             dcl-ds request likeds(RPGAPIRQST) inz;
             dcl-s middleware_completed ind;
 
-            if config.port = 0 and %params < 2;
+            if config.port = 0 and %parms < 2;
               config.port = 3000;
-            elseif %params = 2
+            elseif %parms = 2
               config.port = port;
             endif;
 
