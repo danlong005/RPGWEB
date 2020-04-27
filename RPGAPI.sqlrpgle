@@ -4,7 +4,7 @@
           dcl-proc RPGAPI_start export;
             dcl-pi *n;
               config likeds(RPGAPIAPP);
-              port int(10:0) options(*nopass);
+              port int(10:0) options(*nopass) const;
             end-pi;
             dcl-s index int(10:0) inz;
             dcl-s index2 int(10:0) inz;

@@ -70,7 +70,7 @@
 
         dcl-pr RPGAPI_start;
           config likeds(RPGAPIAPP);
-          port int(10:0) options(*nopass);
+          port int(10:0) options(*nopass) const;
         end-pr;
 
         dcl-pr RPGAPI_stop;
