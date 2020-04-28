@@ -390,9 +390,6 @@
           end-proc;
 
 
-
-
-
           dcl-proc RPGAPI_sendResponse export;
             dcl-pi *n;
               config likeds(RPGAPIAPP) const;
@@ -444,7 +441,7 @@
             end-pi;
             dcl-s return_code int(10:0) inz(0);
             dcl-ds socket_address likeds(socketaddr);
-
+        
             HTTP_messages(1).status = HTTP_OK;
             HTTP_messages(1).text = 'OK';
             HTTP_messages(2).status = HTTP_CREATED;
@@ -457,7 +454,14 @@
             HTTP_messages(5).text = 'Not Found';
             HTTP_messages(6).status = HTTP_INTERNAL_SERVER;
             HTTP_messages(6).text = 'Internal Server Error';
-
+            HTTP_messages(7).status = HTTP_NO_CONTENT;
+            HTTP_messages(7).text = 'No Content';
+            HTTP_messages(8).status = HTTP_MOVED_PERMANENTLY;
+            HTTP_messages(8).text = 'Moved Permanently';
+            HTTP_messages(9).status = HTTP_FOUND;
+            HTTP_messages(9).text = 'Found';
+            HTTP_messages(10).status = HTTP_FORBIDDEN;
+            HTTP_messages(10).text = 'Forbidden';
 
             config.socket_descriptor = socket(AF_INET : SOCK_STREAM : 0);
             return_code = set_socket_options( config.socket_descriptor :
