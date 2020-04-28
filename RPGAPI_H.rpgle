@@ -9,11 +9,6 @@
         dcl-c RPGAPI_DBL_CRLF x'0d250d25';
         dcl-c RPGAPI_GLOBAL_MIDDLEWARE '*';
 
-        dcl-ds HTTP_messages qualified dim(100);
-          status zoned(3:0);
-          text char(25);
-        end-ds;
-
         dcl-ds RPGAPI_header_ds qualified template;
           name char(50);
           value varchar(1024);
