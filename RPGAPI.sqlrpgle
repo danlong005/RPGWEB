@@ -414,15 +414,11 @@
               endif;
             endfor;
 
-            if %len(%trim(response.body)) > 0;
-              data = %trim(data) + 'Content-Length: ' +
-                    %char(%len(%trim(data) + RPGAPI_DBL_CRLF + 
-                    %trim(response.body))) + RPGAPI_CRLF;
+            data = %trim(data) + 'Content-Length: ' +
+                  %char(%len(%trim(response.body))) + RPGAPI_CRLF;
 
+            if %len(%trim(response.body)) > 0;
               data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
-            else;
-              data = %trim(data) + 'Content-Length: ' +
-                    %char(%len(%trim(data))) + RPGAPI_DBL_CRLF;
             endif;
 
             RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
