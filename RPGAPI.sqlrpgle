@@ -418,10 +418,11 @@
                   %char(%len(%trim(response.body))) + RPGAPI_CRLF;
 
             if %len(%trim(response.body)) > 0;
-              data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
+              data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body) +
+                     RPGAPI_CRLF;
             endif;
 
-        //    RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
+            //RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
 
             return_code = write( config.return_socket_descriptor :
                                 %addr(data) :
