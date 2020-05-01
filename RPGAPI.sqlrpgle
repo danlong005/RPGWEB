@@ -395,7 +395,7 @@
               config likeds(RPGAPIAPP) const;
               response likeds(RPGAPIRSP) const;
             end-pi;
-            dcl-s data char(32766) ccsid(819);
+            dcl-s data char(32766);
             dcl-s return_code int(10:0) inz(0);
             dcl-s index int(10:0) inz;
 
@@ -418,11 +418,10 @@
                   %char(%len(%trim(response.body))) + RPGAPI_CRLF;
 
             if %len(%trim(response.body)) > 0;
-              data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body) +
-                     RPGAPI_CRLF;
+              data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
             endif;
 
-            //RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
+            RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
 
             return_code = write( config.return_socket_descriptor :
                                 %addr(data) :
