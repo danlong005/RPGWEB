@@ -421,8 +421,8 @@
               data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
             endif;
 
-            RPGAPI_translate( %len(%trim(data)) : data : 'QTCPASC');
-
+            RPGAPI_translate( %len(%trim(data)) : data :
+                              'QJSON': 'RPGAPI');
             return_code = write( config.return_socket_descriptor :
                                 %addr(data) :
                                 %len(%trim(data)) );
