@@ -415,7 +415,7 @@
             endfor;
 
             data = %trim(data) + 'Content-Length: ' +
-                  %char(%len(%trim(response.body))) + RPGAPI_CRLF;
+                  %char(%len(%trim(response.body)));
 
             if %len(%trim(response.body)) > 0;
               data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
