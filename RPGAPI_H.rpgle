@@ -185,6 +185,7 @@
      D   Length                       5P 0 const
      D   Data                     32766A   options(*varsize)
      D   Table                       10A   const
+     D   Lib                         10A   const options(*nopass)
 
         dcl-s option_val int(10:0);
 
