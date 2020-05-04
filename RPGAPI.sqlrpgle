@@ -19,59 +19,65 @@
               config.port = port;
             endif;
 
-            RPGAPI_setup(config);
+            if (RPGAPI_setup(config));
+              dow 1 = 1;
+                monitor;
+                  clear request;
+                  request = RPGAPI_acceptRequest(config);
 
-            dow 1 = 1;
-              monitor;
-                clear request;
-                request = RPGAPI_acceptRequest(config);
+                  clear response;
+                  clear route_found;
+                  for index = 1 to %elem(config.routes) by 1;
+                    middleware_completed = *on;
 
-                clear response;
-                clear route_found;
-                for index = 1 to %elem(config.routes) by 1;
-                  middleware_completed = *on;
+                    for index2 = 1 to %elem(config.middlewares) by 1;
+                      if middleware_completed and 
+                        RPGAPI_mwMatches(config.middlewares(index2) : request);
+                        
+                        if config.middlewares(index2).url = *blanks;
+                          index2 = %elem(config.middlewares) + 1;
+                          iter;
+                        endif;
 
-                  for index2 = 1 to %elem(config.middlewares) by 1;
-                    if middleware_completed and 
-                      RPGAPI_mwMatches(config.middlewares(index2) : request);
-                      
-                      if config.middlewares(index2).url = *blanks;
-                        index2 = %elem(config.middlewares) + 1;
-                        iter;
+                        RPGAPI_mwCallback_ptr = 
+                          config.middlewares(index2).procedure;
+                        middleware_completed = 
+                          RPGAPI_mwCallback(request : response);
+
+                        if middleware_completed = *off;
+                          index2 = %elem(config.middlewares) + 1;
+                        endif;
                       endif;
+                    endfor;
 
-                      RPGAPI_mwCallback_ptr = 
-                        config.middlewares(index2).procedure;
-                      middleware_completed = 
-                        RPGAPI_mwCallback(request : response);
-
-                      if middleware_completed = *off;
-                        index2 = %elem(config.middlewares) + 1;
+                    if middleware_completed = *on;
+                      if RPGAPI_routeMatches(config.routes(index) : request);
+                        RPGAPI_callback_ptr = config.routes(index).procedure;
+                        response = RPGAPI_callback(request);
+                        route_found = *on;
+                        index = %elem(config.routes) + 1;
                       endif;
-                    endif;
-                  endfor;
-
-                  if middleware_completed = *on;
-                    if RPGAPI_routeMatches(config.routes(index) : request);
-                      RPGAPI_callback_ptr = config.routes(index).procedure;
-                      response = RPGAPI_callback(request);
-                      route_found = *on;
+                    else;
                       index = %elem(config.routes) + 1;
                     endif;
-                  else;
-                    index = %elem(config.routes) + 1;
+                  endfor;
+                  
+                  if not route_found and middleware_completed = *on;
+                    response = RPGAPI_setResponse(request :  HTTP_NOT_FOUND);
                   endif;
-                endfor;
-                
-                if not route_found and middleware_completed = *on;
-                  response = RPGAPI_setResponse(request :  HTTP_NOT_FOUND);
-                endif;
 
-                RPGAPI_sendResponse(config : response);
-              on-error;
-                response = RPGAPI_setResponse(request :  HTTP_INTERNAL_SERVER);
-              endmon;
-            enddo;
+                  RPGAPI_sendResponse(config : response);
+                on-error;
+                  response = RPGAPI_setResponse(request : 
+                                                HTTP_INTERNAL_SERVER);
+                endmon;
+              enddo;
+            else;
+              RPGAPI_log('RPGAPI - Could not setup the application.');
+              RPGAPI_log(RPGAPI_CRLF);
+              RPGAPI_log('RPGAPI - Please see earlier logs for reason.');
+              RPGAPI_log(RPGAPI_CRLF);
+            endif;
 
             RPGAPI_stop(config);
           end-proc;
@@ -432,11 +438,13 @@
 
 
           dcl-proc RPGAPI_setup;
-            dcl-pi *n;
+            dcl-pi *n ind;
               config likeds(RPGAPIAPP);
             end-pi;
             dcl-s return_code int(10:0) inz(0);
             dcl-ds socket_address likeds(socketaddr);
+            dcl-s tries int(10:0) inz;
+            dcl-s bound ind inz;
         
             HTTP_messages(1).status = HTTP_OK;
             HTTP_messages(1).text = 'OK';
@@ -459,21 +467,42 @@
             HTTP_messages(10).status = HTTP_FORBIDDEN;
             HTTP_messages(10).text = 'Forbidden';
 
-            config.socket_descriptor = socket(AF_INET : SOCK_STREAM : 0);
-            return_code = set_socket_options( config.socket_descriptor :
-                                              SOL_SOCKET :
-                                              SO_REUSEADDR :
-                                              %addr(option_val) :
-                                              %size(option_val) );
+            tries = 1;
+            bound = *off;
+            dow (tries <= 3);
+              config.socket_descriptor = socket(AF_INET : SOCK_STREAM : 0);
+              return_code = set_socket_options( config.socket_descriptor :
+                                                SOL_SOCKET :
+                                                SO_REUSEADDR :
+                                                %addr(option_val) :
+                                                %size(option_val) );
 
-            clear socket_address;
-            socket_address.sin_family = AF_INET;
-            socket_address.sin_port = config.port;
-            socket_address.sin_addr = INADDR_ANY;
-            return_code = bind( config.socket_descriptor :
-                                %addr(socket_address) :
-                                %size(socket_address) );
-            return_code = listen( config.socket_descriptor : 1 );
+              clear socket_address;
+              socket_address.sin_family = AF_INET;
+              socket_address.sin_port = config.port;
+              socket_address.sin_addr = INADDR_ANY;
+              return_code = bind( config.socket_descriptor :
+                                  %addr(socket_address) :
+                                  %size(socket_address) );
+              if (return_code < 0);
+                RPGAPI_log('RPGAPI - Failed to bind to port %s.' : 
+                           %char(config.port));
+                RPGAPI_log(RPGAPI_CRLF);           
+                RPGAPI_stop(config);
+                tries = tries + 1;
+              else;
+                tries = 4;
+                bound = *on;
+              endif;
+            enddo;
+            
+            if bound;
+              return_code = listen( config.socket_descriptor : 1 );
+            else;
+              return_code = -1;
+            endif;
+
+            return (return_code = 0);
           end-proc;
 
 
