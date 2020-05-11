@@ -109,6 +109,7 @@ RPGAPI_get(app : url : %paddr(procedure));
 RPGAPI_post(app : url : %paddr(procedure));
 RPGAPI_put(app : url : %paddr(procedure));
 RPGAPI_delete(app : url : %paddr(procedure));
+RPGAPI_patch(app : url : %paddr(procedure));
 ```
 
 We find that these make the code _MUCH_ more readable.
