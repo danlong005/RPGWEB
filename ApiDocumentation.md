@@ -108,7 +108,7 @@ There are also the following methods that are more descriptive that you may want
 RPGAPI_get(app : url : %paddr(procedure));
 RPGAPI_post(app : url : %paddr(procedure));
 RPGAPI_put(app : url : %paddr(procedure));
-RPGAPI_delete(app : url : %paddr(procedure));
+RPGAPI_delete(app : url : %paddr(procedure)); 
 RPGAPI_patch(app : url : %paddr(procedure));
 ```
 
