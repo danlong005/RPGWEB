@@ -114,7 +114,8 @@
                                 %addr(data) :
                                 %size(data) );
 
-            RPGAPI_translate( %len(%trim(data)) : data : 'QTCPEBC');
+            RPGAPI_translate( %len(%trim(data)) : data : 
+                              'QJSONIN' : 'RPGAPI');
             return RPGAPI_parse(data);
           end-proc;
 
@@ -326,6 +327,11 @@
 
             position = 0;
             exec sql set :position = regexp_instr(:url, :route_comparison);
+            if (sqlstate = '42704');
+              if (url = route_comparison);
+                position = 1;
+              endif;
+            endif;
 
             return position > 0 and request.method = route.method;
           end-proc;
@@ -386,6 +392,11 @@
 
             position = 0;
             exec sql set :position = regexp_instr(:url, :route_comparison);
+            if (sqlstate = '42704');
+              if (url = route_comparison);
+                position = 1;
+              endif;
+            endif;
 
             // allowing middlewares for all routes
             if (%trim(route_comparison) = RPGAPI_GLOBAL_MIDDLEWARE);
@@ -420,10 +431,10 @@
               endif;
             endfor;
 
-            data = %trim(data) + 'Content-Length: ' +
-                  %char(%len(%trim(response.body)));
-
             if %len(%trim(response.body)) > 0;
+              data = %trim(data) + 'Content-Length: ' +
+                     %char(%len(%trim(response.body)));
+
               data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
             endif;
 
