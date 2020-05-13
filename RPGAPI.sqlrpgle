@@ -436,6 +436,8 @@
                      %char(%len(%trim(response.body)));
 
               data = %trim(data) + RPGAPI_DBL_CRLF + %trim(response.body);
+            else;
+              data = %trim(data) + RPGAPI_DBL_CRLF;
             endif;
 
             RPGAPI_translate( %len(%trim(data)) : data :
