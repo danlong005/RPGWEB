@@ -16,7 +16,7 @@ CRTTBL TBL(RPGAPI/QJSON)
        BASETBL(QUSRSYS/QTCPASC)
        TEXT('json conversion') 
 ```
-Then make the following changes
+Then make the following changes  
 63 -> 5B  
 FC -> 5D  
 43 -> 7B  
