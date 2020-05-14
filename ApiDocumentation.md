@@ -253,7 +253,7 @@ The response object is something you will create in the callback methods. Inside
 You can set response headers very easily. The following is an example. 
 
 ```
-RPGAPI_getHeader(response : 'Connection' : 'close');
+RPGAPI_setHeader(response : 'Connection' : 'close');
 ```
 
 #### Body
