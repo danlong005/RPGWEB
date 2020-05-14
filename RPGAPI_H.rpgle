@@ -134,6 +134,16 @@
           procedure pointer(*proc) const;
         end-pr;
 
+        dcl-pr RPGAPI_setStatus;
+          response likeds(RPGAPIRSP);
+          status int(10:0) const;
+        end-pr;
+
+        dcl-pr RPGAPI_setBody;
+          response likeds(RPGAPIRSP);
+          body varchar(32000) const;
+        end-pr;
+
         dcl-pr RPGAPI_get;
           config likeds(RPGAPIAPP);
           url varchar(32000) const;

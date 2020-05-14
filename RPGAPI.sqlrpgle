@@ -557,6 +557,24 @@
             endfor;
           end-proc;
 
+          dcl-proc RPGAPI_setStatus export;
+            dcl-pi *n;
+              response likeds(RPGAPIRSP);
+              status int(10:0) const;
+            end-pi;
+
+            response.status = status;
+          end-proc;
+
+          dcl-proc RPGAPI_setBody export;
+            dcl-pi *n;
+              response likeds(RPGAPIRSP);
+              body varchar(32000) const;
+            end-pi;
+
+            response.body = body;
+          end-proc;
+
 
           dcl-proc RPGAPI_get export;
             dcl-pi *n;

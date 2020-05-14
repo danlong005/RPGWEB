@@ -17,10 +17,12 @@ CRTTBL TBL(RPGAPI/QJSON)
        TEXT('json conversion') 
 ```
 Then make the following changes
-63 -> 5B
-FC -> 5D
-43 -> 7B
-DC -> 7D
+63 -> 5B  
+FC -> 5D  
+43 -> 7B  
+DC -> 7D  
+BA -> 5B  
+BB -> 5D  
 
 ## Installation
 In QShell
