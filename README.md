@@ -3,28 +3,10 @@
 ## Description
 A small RPGLE web framework for building web api's on the IBM i.
 
-## Dependencies
-REGEXP_INSTR 
-* 7.1 TR9 
-* 7.2 TR1
-
-Custom hex conversion table because I am using QCDXLATE. In a future release we will be changing over to iconv.
-```
-CRTTBL TBL(RPGAPI/QJSON)       
-       SRCFILE(*PROMPT)        
-       TBLTYPE(*CVT)           
-       BASETBL(QUSRSYS/QTCPASC)
-       TEXT('json conversion') 
-```
-Then make the following changes  
-63 -> 5B  
-FC -> 5D  
-43 -> 7B  
-DC -> 7D  
-BA -> 5B  
-BB -> 5D  
-
 ## Installation
+Install via this SAVF [RPGAPI.savf](RPGAPI.SAVF). Unpack it and it will create the RPGAPI library
+for you.
+
 In QShell
 ```
 cd /
@@ -62,3 +44,25 @@ For getting started quickly here is a small quick start guide
 Here is the full documentation for the library.
 
 [Api Documentation](ApiDocumentation.md)
+
+
+## Dependencies
+REGEXP_INSTR 
+* 7.1 TR9 
+* 7.2 TR1
+
+Custom hex conversion table because I am using QCDXLATE. In a future release we will be changing over to iconv.
+```
+CRTTBL TBL(RPGAPI/QJSON)       
+       SRCFILE(*PROMPT)        
+       TBLTYPE(*CVT)           
+       BASETBL(QUSRSYS/QTCPASC)
+       TEXT('json conversion') 
+```
+Then make the following changes  
+63 -> 5B  
+FC -> 5D  
+43 -> 7B  
+DC -> 7D  
+BA -> 5B  
+BB -> 5D  
