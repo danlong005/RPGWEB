@@ -180,11 +180,12 @@
           directory varchar(1000) const;
         end-pr;
 
-
-
         dcl-pr RPGAPI_setResponse likeds(RPGAPIRSP);
           request likeds(RPGAPIRQST);
-          status zoned(3:0) const;        dcl-pr RPGAPI_staticContentFound ind;
+          status zoned(3:0) const;        
+        end-pr;
+
+        dcl-pr RPGAPI_staticContentFound ind;
           config likeds(RPGAPIAPP);
           route char(250);
         end-pr;
@@ -388,5 +389,5 @@
        dcl-c O_TEXTDATA 16777216; 
        dcl-c O_CCSID 32; 
        dcl-c S_IRGRP 32;
-       
+
       /endif
