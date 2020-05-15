@@ -182,7 +182,7 @@
 
         dcl-pr RPGAPI_setResponse likeds(RPGAPIRSP);
           request likeds(RPGAPIRQST);
-          status zoned(3:0) const;        
+          status zoned(3:0) const;
         end-pr;
 
         dcl-pr RPGAPI_staticContentFound ind;
