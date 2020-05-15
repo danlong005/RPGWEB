@@ -27,6 +27,7 @@
 
                   clear response;
                   clear route_found;
+
                   for index = 1 to %elem(config.routes) by 1;
                     middleware_completed = *on;
 
@@ -62,6 +63,13 @@
                     endif;
                   endfor;
                   
+                  if not route_found and middleware_completed = *on;
+                    if RPGAPI_staticContentFound(config : request.route);
+                      route_found = *on;
+                      response = RPGAPI_loadStaticContent(config : request);
+                    endif;
+                  endif;
+
                   if not route_found and middleware_completed = *on;
                     response = RPGAPI_setResponse(request :  HTTP_NOT_FOUND);
                   endif;
@@ -635,6 +643,15 @@
           end-proc;
 
 
+          dcl-proc RPGAPI_setStatic export;
+            dcl-pi *n;
+              config likeds(RPGAPIAPP);
+              directory varchar(1000) const;
+            end-pi;
+             
+             config.static_content = directory;
+          end-pr;
+
 
           dcl-proc RPGAPI_setResponse;
             dcl-pi *n likeds(RPGAPIRSP);
@@ -731,4 +748,34 @@
             endfor;
 
             return %trim(message);
+          end-proc;
+
+          dcl-proc RPGAPI_staticContentFound;
+            dcl-pi *n ind;
+              config likeds(RPGAPIAPP);
+              route char(250);
+            end-pi;
+            dcl-s foundfile ind inz;
+            dcl-s fd int(10:0) inz;
+            
+            foundFile = *off;
+            
+            fd = RPGAPI_openFile(config.static_content + request.route :
+                                 O_RDONLY + O_TEXTDATA + O_CCSID :
+                                 S_IRGRP : 37);
+
+            foundFile = (fd > -1);
+            RPGAPI_closeFile( fd );
+
+            return foundFile;
+          end-proc;
+
+          dcl-proc RPGAPI_loadStaticContent;
+            dcl-pi *n likeds(RPGAPIRSP);
+              config likeds(RPGAPIAPP)
+              request likeds(RPGAPIRQST);
+            end-pi;
+            dcl-ds response likeds(RPGAPIRSP) inz;
+
+            return response;
           end-proc;

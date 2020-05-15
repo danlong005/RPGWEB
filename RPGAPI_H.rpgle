@@ -50,6 +50,7 @@
           return_socket_descriptor int(10:0);
           routes likeds(RPGAPI_route_ds) dim(250);
           middlewares likeds(RPGAPI_route_ds) dim(100);
+          static_content varchar(1000);
         end-ds;
 
 
@@ -174,9 +175,42 @@
           procedure pointer(*proc) const;
         end-pr;
 
+        dcl-pr RPGAPI_setStatic;
+          config likeds(RPGAPIAPP);
+          directory varchar(1000) const;
+        end-pr;
+
+
+
         dcl-pr RPGAPI_setResponse likeds(RPGAPIRSP);
           request likeds(RPGAPIRQST);
-          status zoned(3:0) const;
+          status zoned(3:0) const;        dcl-pr RPGAPI_staticContentFound ind;
+          config likeds(RPGAPIAPP);
+          route char(250);
+        end-pr;
+
+        dcl-pr RPGAPI_loadStaticContent likeds(RPGAPIRSP);
+          config likeds(RPGAPIAPP)
+          request likeds(RPGAPIRQST);
+        end-pr;
+        end-pr;
+
+        dcl-pr RPGAPI_openFile int(10:0) extproc('open');
+          *n pointer value options(*string);
+          *n int(10) value;
+          *n uns(10) value options(*nopass);
+          *n uns(10) value options(*nopass);
+          *n uns(10) value options(*nopass);
+        end-pr;
+
+        dcl-pr RPGAPI_readFile int(10) extproc('read');
+          *n int(10) value; 
+          *n pointer value;
+          *n uns(10) value;
+        end-pr ;
+
+        dcl-pr RPGAPI_closeFile int(10) extproc('close');
+          *n  int(10) value;
         end-pr;
 
         dcl-pr RPGAPI_toUpper varchar(32000);
@@ -349,5 +383,10 @@
        dcl-c SO_USELOOPBACK 80;
        dcl-c INADDR_ANY 0;
        dcl-c RC_OK 0;
+       
+       dcl-c O_RDONLY 1;         
+       dcl-c O_TEXTDATA 16777216; 
+       dcl-c O_CCSID 32; 
+       dcl-c S_IRGRP 32;
        
       /endif
