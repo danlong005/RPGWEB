@@ -650,7 +650,7 @@
             end-pi;
              
              config.static_content = directory;
-          end-pr;
+          end-proc;
 
 
           dcl-proc RPGAPI_setResponse;
@@ -760,7 +760,7 @@
             
             foundFile = *off;
             
-            fd = RPGAPI_openFile(config.static_content + request.route :
+            fd = RPGAPI_openFile(%trim(config.static_content) + %trim(route) :
                                  O_RDONLY + O_TEXTDATA + O_CCSID :
                                  S_IRGRP : 37);
 
@@ -772,10 +772,33 @@
 
           dcl-proc RPGAPI_loadStaticContent;
             dcl-pi *n likeds(RPGAPIRSP);
-              config likeds(RPGAPIAPP)
+              config likeds(RPGAPIAPP);
               request likeds(RPGAPIRQST);
             end-pi;
             dcl-ds response likeds(RPGAPIRSP) inz;
+            dcl-s fd int(10:0) inz;
+            dcl-s data char(80) inz;
+            dcl-s length int(10:0) inz;
+            
+            fd = RPGAPI_openFile(%trim(config.static_content) + 
+                                 %trim(request.route) :
+                                 O_RDONLY + O_TEXTDATA + O_CCSID :
+                                 S_IRGRP : 37);
+
+            if (fd > -1);
+              clear data;
+              length = RPGAPI_readFile(fd : %addr(data) : %size(data));
+              dow length > 0;
+                response.body = %trim(response.body) + data;
+
+                clear data;
+                length = RPGAPI_readFile(fd : %addr(data) : %size(data));
+              enddo;
+            endif;
+            RPGAPI_setStatus(response : HTTP_OK);
+            RPGAPI_setHeader(response : 'Content-Type' : 'text/html');
+
+            RPGAPI_closeFile( fd );
 
             return response;
           end-proc;

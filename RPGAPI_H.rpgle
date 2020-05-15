@@ -191,9 +191,8 @@
         end-pr;
 
         dcl-pr RPGAPI_loadStaticContent likeds(RPGAPIRSP);
-          config likeds(RPGAPIAPP)
+          config likeds(RPGAPIAPP);
           request likeds(RPGAPIRQST);
-        end-pr;
         end-pr;
 
         dcl-pr RPGAPI_openFile int(10:0) extproc('open');
