@@ -1,9 +1,10 @@
 # README
 
 ## Description
-An web framework for building web application in RPG.
+RPGApi - An web framework for building web application in RPG.
+brought to you by _Modern-I-Nation_.
 
-[<img src="./imgs/patreon.png">](https://www.patreon.com/RPGApi)
+[<img src="./imgs/patreon.png">](https://www.patreon.com/modernination)
 
 ## Installation
 Install via this SAVF [RPGAPI.savf](downloads/RPGAPI.SAVF). Unpack it and it will create the RPGAPI library
