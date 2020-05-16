@@ -1,8 +1,9 @@
 # README
 
 ## Description
-RPGApi - An web framework for building web application in RPG.
-brought to you by _Modern-I-Nation_.
+RPGApi - An web framework for building web application in RPG.  
+  
+brought to you by [_Modern-I-Nation_](http://modernination.com).
 
 [<img src="./imgs/patreon.png">](https://www.patreon.com/modernination)
 
