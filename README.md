@@ -1,10 +1,12 @@
 # README
 
+[<img src="./imgs/patreon.png">](https://www.patreon.com/RPGApi)
+
 ## Description
 A small RPGLE web framework for building web api's on the IBM i.
 
 ## Installation
-Install via this SAVF [RPGAPI.savf](RPGAPI.SAVF). Unpack it and it will create the RPGAPI library
+Install via this SAVF [RPGAPI.savf](downloads/RPGAPI.SAVF). Unpack it and it will create the RPGAPI library
 for you.
 
 In QShell
@@ -39,11 +41,11 @@ Quick start guide for a quick intro.
 
 For getting started quickly here is a small quick start guide
 
-[Quick Start](QuickStart.md)
+[Quick Start](docs/QuickStart.md)
 
 Here is the full documentation for the library.
 
-[Api Documentation](ApiDocumentation.md)
+[Api Documentation](docs/ApiDocumentation.md)
 
 
 ## Dependencies
