@@ -1,9 +1,9 @@
 # README
 
-[<img src="./imgs/patreon.png">](https://www.patreon.com/RPGApi)
-
 ## Description
-A small RPGLE web framework for building web api's on the IBM i.
+An web framework for building web application in RPG.
+
+[<img src="./imgs/patreon.png">](https://www.patreon.com/RPGApi)
 
 ## Installation
 Install via this SAVF [RPGAPI.savf](downloads/RPGAPI.SAVF). Unpack it and it will create the RPGAPI library
