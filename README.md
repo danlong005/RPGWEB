@@ -9,7 +9,7 @@ brought to you by [_Modern-I-Nation_](http://modernination.com).
 
 ## Installation
 Install via this SAVF 
-[RPGAPI.savf](http://modernination.com/dwnloads/RPGAPI.savf). 
+[RPGAPI.savf](http://modernination.com/dwnloads/RPGAPI.SAVF). 
 Unpack it and it will create the RPGAPI library
 for you.
 
