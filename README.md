@@ -8,7 +8,9 @@ brought to you by [_Modern-I-Nation_](http://modernination.com).
 [<img src="./imgs/patreon.png">](https://www.patreon.com/modernination)
 
 ## Installation
-Install via this SAVF [RPGAPI.savf](downloads/RPGAPI.SAVF). Unpack it and it will create the RPGAPI library
+Install via this SAVF 
+[RPGAPI.savf](http://modernination.com/dwnloads/RPGAPI.savf). 
+Unpack it and it will create the RPGAPI library
 for you.
 
 In QShell
