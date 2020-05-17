@@ -11,7 +11,7 @@
             dcl-s route_found ind inz;
             dcl-ds response likeds(RPGAPIRSP) inz;
             dcl-ds request likeds(RPGAPIRQST) inz;
-            dcl-s middleware_completed ind;
+            dcl-s continue_request ind;
 
             if config.port = 0 and %parms < 2;
               config.port = 3000;
@@ -27,42 +27,53 @@
 
                   clear response;
                   clear route_found;
-                  for index = 1 to %elem(config.routes) by 1;
-                    middleware_completed = *on;
+                  continue_request = *on;
 
-                    for index2 = 1 to %elem(config.middlewares) by 1;
-                      if middleware_completed and 
-                        RPGAPI_mwMatches(config.middlewares(index2) : request);
-                        
-                        if config.middlewares(index2).url = *blanks;
-                          index2 = %elem(config.middlewares) + 1;
-                          iter;
+                  // run middlewares
+                  for index2 = 1 to %elem(config.middlewares) by 1;
+                    if continue_request;
+                      if config.middlewares(index2).url <> *blanks;
+                        if RPGAPI_mwMatches(config.middlewares(index2) : 
+                                            request);
+                          RPGAPI_mwCallback_ptr = 
+                            config.middlewares(index2).procedure;
+                          continue_request = 
+                             RPGAPI_mwCallback(request : response);
                         endif;
-
-                        RPGAPI_mwCallback_ptr = 
-                          config.middlewares(index2).procedure;
-                        middleware_completed = 
-                          RPGAPI_mwCallback(request : response);
-
-                        if middleware_completed = *off;
-                          index2 = %elem(config.middlewares) + 1;
-                        endif;
-                      endif;
-                    endfor;
-
-                    if middleware_completed = *on;
-                      if RPGAPI_routeMatches(config.routes(index) : request);
-                        RPGAPI_callback_ptr = config.routes(index).procedure;
-                        response = RPGAPI_callback(request);
-                        route_found = *on;
-                        index = %elem(config.routes) + 1;
+                      else;
+                        index2 = %elem(config.middlewares) + 1;
                       endif;
                     else;
-                      index = %elem(config.routes) + 1;
+                      index2 = %elem(config.middlewares) + 1;
                     endif;
                   endfor;
+
+                  // run routes
+                  if continue_request;
+                    for index = 1 to %elem(config.routes) by 1;
+                      if (config.routes(index).url <> *blanks);
+                        if RPGAPI_routeMatches(config.routes(index) : request);
+                          RPGAPI_callback_ptr = config.routes(index).procedure;
+                          response = RPGAPI_callback(request);
+                          route_found = *on;
+                          index = %elem(config.routes) + 1;
+                        endif;
+                      else;
+                        index = %elem(config.routes) + 1;
+                      endif;
+                    endfor;
+                  endif;
                   
-                  if not route_found and middleware_completed = *on;
+                  // look for static content
+                  if not route_found and continue_request;
+                    if RPGAPI_staticContentFound(config : request.route);
+                      route_found = *on;
+                      response = RPGAPI_loadStaticContent(config : request);
+                    endif;
+                  endif;
+
+                  // end of the rope just 404 it
+                  if not route_found and continue_request;
                     response = RPGAPI_setResponse(request :  HTTP_NOT_FOUND);
                   endif;
 
@@ -635,6 +646,15 @@
           end-proc;
 
 
+          dcl-proc RPGAPI_setStatic export;
+            dcl-pi *n;
+              config likeds(RPGAPIAPP);
+              directory varchar(1000) const;
+            end-pi;
+             
+             config.static_content = directory;
+          end-proc;
+
 
           dcl-proc RPGAPI_setResponse;
             dcl-pi *n likeds(RPGAPIRSP);
@@ -731,4 +751,57 @@
             endfor;
 
             return %trim(message);
+          end-proc;
+
+          dcl-proc RPGAPI_staticContentFound;
+            dcl-pi *n ind;
+              config likeds(RPGAPIAPP);
+              route char(250);
+            end-pi;
+            dcl-s foundfile ind inz;
+            dcl-s fd int(10:0) inz;
+            
+            foundFile = *off;
+            
+            fd = RPGAPI_openFile(%trim(config.static_content) + %trim(route) :
+                                 O_RDONLY + O_TEXTDATA + O_CCSID :
+                                 S_IRGRP : 37);
+
+            foundFile = (fd > -1);
+            RPGAPI_closeFile( fd );
+
+            return foundFile;
+          end-proc;
+
+          dcl-proc RPGAPI_loadStaticContent;
+            dcl-pi *n likeds(RPGAPIRSP);
+              config likeds(RPGAPIAPP);
+              request likeds(RPGAPIRQST);
+            end-pi;
+            dcl-ds response likeds(RPGAPIRSP) inz;
+            dcl-s fd int(10:0) inz;
+            dcl-s data char(80) inz;
+            dcl-s length int(10:0) inz;
+            
+            fd = RPGAPI_openFile(%trim(config.static_content) + 
+                                 %trim(request.route) :
+                                 O_RDONLY + O_TEXTDATA + O_CCSID :
+                                 S_IRGRP : 37);
+
+            if (fd > -1);
+              clear data;
+              length = RPGAPI_readFile(fd : %addr(data) : %size(data));
+              dow length > 0;
+                response.body = %trim(response.body) + data;
+
+                clear data;
+                length = RPGAPI_readFile(fd : %addr(data) : %size(data));
+              enddo;
+            endif;
+            RPGAPI_setStatus(response : HTTP_OK);
+            RPGAPI_setHeader(response : 'Content-Type' : 'text/html');
+
+            RPGAPI_closeFile( fd );
+
+            return response;
           end-proc;
