@@ -1,24 +1,24 @@
-       ctl-opt option(*nodebugio:*srcstmt) bnddir('RPGAPI':'YAJL')
+       ctl-opt option(*nodebugio:*srcstmt) bnddir('RPGWEB':'YAJL')
               dftactgrp(*no);
 
-      /copy RPGAPI/qrpglesrc,RPGAPI_H
+      /copy RPGWEB/qrpglesrc,RPGWEB_H
       /include yajl/qrpglesrc,YAJL_H
 
-       dcl-ds request likeds(RPGAPIRQST);
-       dcl-ds response likeds(RPGAPIRSP);
-       dcl-ds app likeds(RPGAPIAPP);
+       dcl-ds request likeds(RPGWEBRQST);
+       dcl-ds response likeds(RPGWEBRSP);
+       dcl-ds app likeds(RPGWEBAPP);
 
        clear app;
        app.port = 3012;
 
        // adding a middleware to all routes
-       RPGAPI_setMiddleware(app: RPGAPI_GLOBAL_MIDDLEWARE: %paddr(CHECK_AUTH));
+       RPGWEB_setMiddleware(app: RPGWEB_GLOBAL_MIDDLEWARE: %paddr(CHECK_AUTH));
 
        // adding a middle ware to a specific route
-       RPGAPI_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
-       RPGAPI_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
+       RPGWEB_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
+       RPGWEB_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
 
-       RPGAPI_start(app);
+       RPGWEB_start(app);
 
        *inlr = *on;
        return;
@@ -26,16 +26,16 @@
 
        dcl-proc CHECK_AUTH;
          dcl-pi *n ind;
-           request likeds(RPGAPIRQST) const;
-           response likeds(RPGAPIRSP) const;
+           request likeds(RPGWEBRQST) const;
+           response likeds(RPGWEBRSP) const;
          end-pi;
 
          return *on;
        end-proc;
 
        dcl-proc MBR_show;
-         dcl-pi *n likeds(RPGAPIRSP);
-           request likeds(RPGAPIRQST) const;
+         dcl-pi *n likeds(RPGWEBRSP);
+           request likeds(RPGWEBRQST) const;
          end-pi;
          dcl-s Length Int(10:0) Inz;
          dcl-s CCSID Int(10:0) Inz;
@@ -48,7 +48,7 @@
          dcl-s data char(500);
 
          clear row;
-         id_number = %dec(RPGAPI_getParam(request: 'id') : 11 : 0);
+         id_number = %dec(RPGWEB_getParam(request: 'id') : 11 : 0);
 
          exec sql select id, fname, lname
                   into :row
@@ -58,7 +58,7 @@
          clear response;
          clear data;
          response.status = HTTP_OK;
-         RPGAPI_setHeader(response : 'Content-Type' : 'application/json');
+         RPGWEB_setHeader(response : 'Content-Type' : 'application/json');
          
          if row.id <> *zeros;
            YAJL_genOpen( *off );

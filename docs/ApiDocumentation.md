@@ -1,18 +1,18 @@
-# RPGAPI Documentation
+# RPGWEB Documentation
 
 ### Application Data Structures
 ```
         //
         // the request data structure
         //
-        dcl-ds RPGAPIRQST qualified template;
+        dcl-ds RPGWEBRQST qualified template;
           body varchar(32000);
-          headers likeds(RPGAPI_header_ds) dim(100);
+          headers likeds(RPGWEB_header_ds) dim(100);
           hostname char(250);
           method char(10);
-          params likeds(RPGAPI_param_ds) dim(100);
+          params likeds(RPGWEB_param_ds) dim(100);
           protocol char(250);
-          query_params likeds(RPGAPI_param_ds) dim(100);
+          query_params likeds(RPGWEB_param_ds) dim(100);
           query_string char(1024);
           route char(250);
         end-ds;
@@ -20,33 +20,33 @@
         //
         // the response data structure
         //
-        dcl-ds RPGAPIRSP qualified template;
+        dcl-ds RPGWEBRSP qualified template;
           body varchar(32000);
-          headers likeds(RPGAPI_header_ds) dim(100);
+          headers likeds(RPGWEB_header_ds) dim(100);
           status int(10:0);
         end-ds;
 
         //
         // the application data structure
         //
-        dcl-ds RPGAPIAPP qualified template;
+        dcl-ds RPGWEBAPP qualified template;
           port int(10:0);                          // default is 3000
           socket_descriptor int(10:0);
           return_socket_descriptor int(10:0);
-          routes likeds(RPGAPI_route_ds) dim(500);
+          routes likeds(RPGWEB_route_ds) dim(500);
         end-ds;
 
-        dcl-ds RPGAPI_header_ds qualified template;
+        dcl-ds RPGWEB_header_ds qualified template;
           name char(50);
           value varchar(1024);
         end-ds;
 
-        dcl-ds RPGAPI_param_ds qualified template;
+        dcl-ds RPGWEB_param_ds qualified template;
           name char(50);
           value varchar(1024);
         end-ds;
 
-        dcl-ds RPGAPI_route_ds qualified template;
+        dcl-ds RPGWEB_route_ds qualified template;
           method char(10);
           url varchar(32000);
           procedure pointer(*proc);
@@ -57,38 +57,38 @@
 For a simple application to get you up and running checkout our [Quick Start](QuickStart.md) guide. This will get you up and running with a RPG web application in no time.
 
 #### Callbacks
-To create web application in RPGAPI you have to follow a simple pattern on your callbacks(procedures) that process the requests. 
+To create web application in RPGWEB you have to follow a simple pattern on your callbacks(procedures) that process the requests. 
 
 ```
 dcl-proc index;
-  dcl-pi *n likeds(RPGAPIRSP);
-    request likeds(RPGAPIRQST) const;
+  dcl-pi *n likeds(RPGWEBRSP);
+    request likeds(RPGWEBRQST) const;
   end-pi;
-  dcl-ds response likeds(RPGAPIRSP);
+  dcl-ds response likeds(RPGWEBRSP);
   
   ...your code...
   
   return response;
 end-proc;
 ```
-You will notice that the procedure takes a RPGAPIRQST(RPGAPI request) and returns a RPGAPIRSP(RPGAPI response). That's it! Inside of the method you can create whatever you need and load it into the response before you return it. We will dive more into this later.
+You will notice that the procedure takes a RPGWEBRQST(RPGWEB request) and returns a RPGWEBRSP(RPGWEB response). That's it! Inside of the method you can create whatever you need and load it into the response before you return it. We will dive more into this later.
 
 #### Kicking off the application
 Once you have registered some routes in the app data structure you can start the application so that your app can start handling request. You can start the application using the following api call
 
 ```
-RPGAPI_start(app);
+RPGWEB_start(app);
 ```
 
 or add the port on the start command
 ```
-RPGAPI_start(app: 3000);
+RPGWEB_start(app: 3000);
 ```
 
 or configure the port via the app
 ```
 app.port = 3000;
-RPGAPI_start(app);
+RPGWEB_start(app);
 ```
 _NOTE:_ The default port is 3000.
 
@@ -99,17 +99,17 @@ To create routes in your application we have given you several ways to create th
 First up is the setRoute method. This can be used for all types of routes. POST, PATCH, PUT, DELETE, GET... etc You simply pass the application data structure, METHOD, url and a pointer to the procedure you want to call when this route is hit. 
 
 ```
-RPGAPI_setRoute(app : METHOD : url : %paddr(procedure));
+RPGWEB_setRoute(app : METHOD : url : %paddr(procedure));
 ```
 
 There are also the following methods that are more descriptive that you may want to use for creating your routes.
 
 ```
-RPGAPI_get(app : url : %paddr(procedure));
-RPGAPI_post(app : url : %paddr(procedure));
-RPGAPI_put(app : url : %paddr(procedure));
-RPGAPI_delete(app : url : %paddr(procedure)); 
-RPGAPI_patch(app : url : %paddr(procedure));
+RPGWEB_get(app : url : %paddr(procedure));
+RPGWEB_post(app : url : %paddr(procedure));
+RPGWEB_put(app : url : %paddr(procedure));
+RPGWEB_delete(app : url : %paddr(procedure)); 
+RPGWEB_patch(app : url : %paddr(procedure));
 ```
 
 We find that these make the code _MUCH_ more readable.
@@ -117,19 +117,19 @@ We find that these make the code _MUCH_ more readable.
 ##### Defining Routes
 For route params you can define routes in the following way
 ```
-RPGAPI_get(app: '/v1/things/{id}': %paddr(procedure));
+RPGWEB_get(app: '/v1/things/{id}': %paddr(procedure));
 ```
 Now there will be a route param of id that will be available to you in the produre that is ran when this route is matched. 
 
 You can gain access to that param using the following code. This will be a string value. Convert it as needed. 
 ```
-RPGAPI_getParam(request: 'id');
+RPGWEB_getParam(request: 'id');
 ```
 
 When defining routes it is the same as other api frameworks. Define specific routes before more general routes.
 ```
-RPGAPI_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
-RPGAPI_get(app : '/api/v1/memberships' : %paddr(MBR_index));
+RPGWEB_get(app : '/api/v1/memberships/{id}' : %paddr(MBR_show));
+RPGWEB_get(app : '/api/v1/memberships' : %paddr(MBR_index));
 ```
 
 ### Middleware
@@ -138,11 +138,11 @@ RPGAPI_get(app : '/api/v1/memberships' : %paddr(MBR_index));
 For global middleware you can create do the following.
 
 ```
-  RPGAPI_setMiddleware(app: RPGAPI_GLOBAL_MIDDLEWARE: %paddr(CHECK_AUTH));
+  RPGWEB_setMiddleware(app: RPGWEB_GLOBAL_MIDDLEWARE: %paddr(CHECK_AUTH));
 ```
 or
 ```
-  RPGAPI_setMiddleware(app: '*': %paddr(CHECK_AUTH));
+  RPGWEB_setMiddleware(app: '*': %paddr(CHECK_AUTH));
 ```
 if you don't want to type the constant name.
 
@@ -152,7 +152,7 @@ if you don't want to type the constant name.
 To create middleware on your routes you can use the following method.
 
 ```
-  RPGAPI_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
+  RPGWEB_setMiddleware(app : '/api/v1/memberships' : %paddr(CHECK_AUTH));
 ```
 
 and the defintion of the middleware callback is as follows
@@ -160,8 +160,8 @@ and the defintion of the middleware callback is as follows
 ```
   dcl-proc CHECK_AUTH;
     dcl-pi *n ind;
-      request likeds(RPGAPIRQST) const;
-      response likeds(RPGAPIRSP);
+      request likeds(RPGWEBRQST) const;
+      response likeds(RPGWEBRSP);
     end-pi;
 
     return *on;
@@ -180,14 +180,14 @@ Given that you followed the outline specs for your callback procedures the reque
 These are the headers that came in on the request. You can access those headers using the following api method
 
 ```
-header_value = RPGAPI_getHeader(request : 'Content-Type');
+header_value = RPGWEB_getHeader(request : 'Content-Type');
 ```
 
 #### Params
 These are the route params that came in on the request. To define route params in your route see the section on routing. You can access the params using the following api method
 
 ```
-id_value = RPGAPI_getParam(request : 'id');
+id_value = RPGWEB_getParam(request : 'id');
 ```
 
 #### Body
@@ -212,7 +212,7 @@ or you can access the various values in the query string using the following
 method
 
 ```
-query_string_param = RPGAPI_getQueryParam(request : 'q');
+query_string_param = RPGWEB_getQueryParam(request : 'q');
 ```
 Note: q would be the param name in the query string like `q=fish`
 
@@ -244,7 +244,7 @@ route = request.route;
 ### Responses
 The response object is something you will create in the callback methods. Inside the callback method you will define the response and return it from your callback. 
 ```
-  dcl-ds response likeds(RPGAPIRSP);
+  dcl-ds response likeds(RPGWEBRSP);
 
   return response;
 ```
@@ -253,7 +253,7 @@ The response object is something you will create in the callback methods. Inside
 You can set response headers very easily. The following is an example. 
 
 ```
-RPGAPI_setHeader(response : 'Connection' : 'close');
+RPGWEB_setHeader(response : 'Connection' : 'close');
 ```
 
 #### Body

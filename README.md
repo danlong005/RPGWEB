@@ -1,7 +1,7 @@
 # README
 
 ## Description
-RPGApi - An web framework for building web application in RPG.  
+RPGWeb - An web framework for building web application in RPG.  
   
 brought to you by [_Modern-I-Nation_](http://modernination.com).
 
@@ -9,8 +9,8 @@ brought to you by [_Modern-I-Nation_](http://modernination.com).
 
 ## Installation
 Install via this SAVF 
-[RPGAPI.savf](http://modernination.com/dwnloads/RPGAPI.SAVF). 
-Unpack it and it will create the RPGAPI library
+[RPGWEB.savf](http://modernination.com/dwnloads/RPGWEB.SAVF). 
+Unpack it and it will create the RPGWEB library
 for you.
 
 In QShell
@@ -22,19 +22,19 @@ git clone ....
 Then exit QShell and run the following CL command
 ```
 QSYS/CRTBNDCL PGM([YOURLIB]/BUILD)                        
-              SRCSTMF('/downloaded/location/RPGAPI/build.clle')
+              SRCSTMF('/downloaded/location/RPGWEB/build.clle')
               DBGVIEW(*SOURCE)                         
 ```
 
 If you cannot compile CL's from the IFS on your machine, use the following command to copy the build program to a source member. Then use the CHGPFM command to make it a CL. Then compile as normal.
 ```
-CPYFRMSTMF FROMSTMF('/downloaded/location/RPGAPI/BUILD.CLLE')
+CPYFRMSTMF FROMSTMF('/downloaded/location/RPGWEB/BUILD.CLLE')
            TOMBR('/QSYS.LIB/[YOURLIB].LIB/QCLSRC.FILE/BUILD.MBR')
 
 CHGPFM FILE([YOURLIB]/QCLSRC) MBR(BUILD) SRCTYPE(CLLE)
 ```
 
-Then you can run the build script to create the RPGAPI library, and all of the 
+Then you can run the build script to create the RPGWEB library, and all of the 
 programs, and include files.
 ```
 CALL [YOURLIB]/BUILD PARM('/downloaded/location')
@@ -59,7 +59,7 @@ REGEXP_INSTR
 
 Custom hex conversion table because I am using QCDXLATE. In a future release we will be changing over to iconv.
 ```
-CRTTBL TBL(RPGAPI/QJSON)       
+CRTTBL TBL(RPGWEB/QJSON)       
        SRCFILE(*PROMPT)        
        TBLTYPE(*CVT)           
        BASETBL(QUSRSYS/QTCPASC)

@@ -1,201 +1,201 @@
-      /if not defined(RPGAPI_H)
-      /define RPGAPI_H
+      /if not defined(RPGWEB_H)
+      /define RPGWEB_H
 
-      /include RPGAPI/QRPGLESRC,HTTP_H
+      /include RPGWEB/QRPGLESRC,HTTP_H
 
-        dcl-c RPGAPI_LF x'0d';
-        dcl-c RPGAPI_CR x'25';
-        dcl-c RPGAPI_CRLF x'0d25';
-        dcl-c RPGAPI_DBL_CRLF x'0d250d25';
-        dcl-c RPGAPI_GLOBAL_MIDDLEWARE '*';
+        dcl-c RPGWEB_LF x'0d';
+        dcl-c RPGWEB_CR x'25';
+        dcl-c RPGWEB_CRLF x'0d25';
+        dcl-c RPGWEB_DBL_CRLF x'0d250d25';
+        dcl-c RPGWEB_GLOBAL_MIDDLEWARE '*';
 
 
-        dcl-ds RPGAPI_header_ds qualified template;
+        dcl-ds RPGWEB_header_ds qualified template;
           name char(50);
           value varchar(1024);
         end-ds;
 
-        dcl-ds RPGAPI_param_ds qualified template;
+        dcl-ds RPGWEB_param_ds qualified template;
           name char(50);
           value varchar(1024);
         end-ds;
 
-        dcl-ds RPGAPI_route_ds qualified template;
+        dcl-ds RPGWEB_route_ds qualified template;
           method char(10);
           url varchar(32000);
           procedure pointer(*proc);
         end-ds;
 
-        dcl-ds RPGAPIRQST qualified template;
+        dcl-ds RPGWEBRQST qualified template;
           body varchar(32000);
-          headers likeds(RPGAPI_header_ds) dim(100);
+          headers likeds(RPGWEB_header_ds) dim(100);
           hostname char(250);
           method char(10);
-          params likeds(RPGAPI_param_ds) dim(100);
+          params likeds(RPGWEB_param_ds) dim(100);
           protocol char(250);
-          query_params likeds(RPGAPI_param_ds) dim(100);
+          query_params likeds(RPGWEB_param_ds) dim(100);
           query_string char(1024);
           route char(250);
         end-ds;
 
-        dcl-ds RPGAPIRSP qualified template;
+        dcl-ds RPGWEBRSP qualified template;
           body varchar(32000);
-          headers likeds(RPGAPI_header_ds) dim(100);
+          headers likeds(RPGWEB_header_ds) dim(100);
           status int(10:0);
         end-ds;
 
-        dcl-ds RPGAPIAPP qualified template;
+        dcl-ds RPGWEBAPP qualified template;
           port int(10:0);
           socket_descriptor int(10:0);
           return_socket_descriptor int(10:0);
-          routes likeds(RPGAPI_route_ds) dim(250);
-          middlewares likeds(RPGAPI_route_ds) dim(100);
+          routes likeds(RPGWEB_route_ds) dim(250);
+          middlewares likeds(RPGWEB_route_ds) dim(100);
           static_content varchar(1000);
         end-ds;
 
 
-        dcl-s RPGAPI_callback_ptr pointer(*proc);
-        dcl-pr RPGAPI_callBack extproc(RPGAPI_callBack_ptr) likeds(RPGAPIRSP);
-          request likeds(RPGAPIRQST) const;
+        dcl-s RPGWEB_callback_ptr pointer(*proc);
+        dcl-pr RPGWEB_callBack extproc(RPGWEB_callBack_ptr) likeds(RPGWEBRSP);
+          request likeds(RPGWEBRQST) const;
         end-pr;
 
-        dcl-s RPGAPI_mwCallback_ptr pointer(*proc);
-        dcl-pr RPGAPI_mwCallback ind extproc(RPGAPI_mwCallback_ptr);
-          request likeds(RPGAPIRQST) const;
-          response likeds(RPGAPIRSP);
+        dcl-s RPGWEB_mwCallback_ptr pointer(*proc);
+        dcl-pr RPGWEB_mwCallback ind extproc(RPGWEB_mwCallback_ptr);
+          request likeds(RPGWEBRQST) const;
+          response likeds(RPGWEBRSP);
         end-pr;
 
-        dcl-pr RPGAPI_start;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_start;
+          config likeds(RPGWEBAPP);
           port int(10:0) options(*nopass) const;
         end-pr;
 
-        dcl-pr RPGAPI_stop;
-          config likeds(RPGAPIAPP) const;
+        dcl-pr RPGWEB_stop;
+          config likeds(RPGWEBAPP) const;
         end-pr;
 
-        dcl-pr RPGAPI_acceptRequest likeds(RPGAPIRQST);
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_acceptRequest likeds(RPGWEBRQST);
+          config likeds(RPGWEBAPP);
         end-pr;
 
-        dcl-pr RPGAPI_parse likeds(RPGAPIRQST);
+        dcl-pr RPGWEB_parse likeds(RPGWEBRQST);
           raw_request varchar(32000) const;
         end-pr;
 
-        dcl-pr RPGAPI_getParam varchar(1024);
-          request likeds(RPGAPIRQST) const;
+        dcl-pr RPGWEB_getParam varchar(1024);
+          request likeds(RPGWEBRQST) const;
           param char(50) const;
         end-pr;
 
-        dcl-pr RPGAPI_getQueryParam varchar(1024);
-          request likeds(RPGAPIRQST) const;
+        dcl-pr RPGWEB_getQueryParam varchar(1024);
+          request likeds(RPGWEBRQST) const;
           param char(50) const;
         end-pr;
 
-        dcl-pr RPGAPI_getHeader varchar(1024);
-          request likeds(RPGAPIRQST) const;
+        dcl-pr RPGWEB_getHeader varchar(1024);
+          request likeds(RPGWEBRQST) const;
           header char(50) const;
         end-pr;
 
-        dcl-pr RPGAPI_setHeader;
-          response likeds(RPGAPIRSP);
+        dcl-pr RPGWEB_setHeader;
+          response likeds(RPGWEBRSP);
           header_name char(50) const;
           header_value varchar(1024) const;
         end-pr;
 
-        dcl-pr RPGAPI_routeMatches ind;
-          route likeds(RPGAPI_route_ds);
-          request likeds(RPGAPIRQST);
+        dcl-pr RPGWEB_routeMatches ind;
+          route likeds(RPGWEB_route_ds);
+          request likeds(RPGWEBRQST);
         end-pr;
 
-        dcl-pr RPGAPI_mwMatches ind;
-          route likeds(RPGAPI_route_ds);
-          request likeds(RPGAPIRQST);
+        dcl-pr RPGWEB_mwMatches ind;
+          route likeds(RPGWEB_route_ds);
+          request likeds(RPGWEBRQST);
         end-pr;
 
-        dcl-pr RPGAPI_sendResponse;
-          config likeds(RPGAPIAPP) const;
-          response likeds(RPGAPIRSP) const;
+        dcl-pr RPGWEB_sendResponse;
+          config likeds(RPGWEBAPP) const;
+          response likeds(RPGWEBRSP) const;
         end-pr;
 
-        dcl-pr RPGAPI_setup ind;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_setup ind;
+          config likeds(RPGWEBAPP);
         end-pr;
 
-        dcl-pr RPGAPI_setRoute;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_setRoute;
+          config likeds(RPGWEBAPP);
           method char(10) const;
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_setMiddleware;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_setMiddleware;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_setStatus;
-          response likeds(RPGAPIRSP);
+        dcl-pr RPGWEB_setStatus;
+          response likeds(RPGWEBRSP);
           status int(10:0) const;
         end-pr;
 
-        dcl-pr RPGAPI_setBody;
-          response likeds(RPGAPIRSP);
+        dcl-pr RPGWEB_setBody;
+          response likeds(RPGWEBRSP);
           body varchar(32000) const;
         end-pr;
 
-        dcl-pr RPGAPI_get;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_get;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_put;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_put;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_patch;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_patch;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_post;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_post;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_delete;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_delete;
+          config likeds(RPGWEBAPP);
           url varchar(32000) const;
           procedure pointer(*proc) const;
         end-pr;
 
-        dcl-pr RPGAPI_setStatic;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_setStatic;
+          config likeds(RPGWEBAPP);
           directory varchar(1000) const;
         end-pr;
 
-        dcl-pr RPGAPI_setResponse likeds(RPGAPIRSP);
-          request likeds(RPGAPIRQST);
+        dcl-pr RPGWEB_setResponse likeds(RPGWEBRSP);
+          request likeds(RPGWEBRQST);
           status zoned(3:0) const;
         end-pr;
 
-        dcl-pr RPGAPI_staticContentFound ind;
-          config likeds(RPGAPIAPP);
+        dcl-pr RPGWEB_staticContentFound ind;
+          config likeds(RPGWEBAPP);
           route char(250);
         end-pr;
 
-        dcl-pr RPGAPI_loadStaticContent likeds(RPGAPIRSP);
-          config likeds(RPGAPIAPP);
-          request likeds(RPGAPIRQST);
+        dcl-pr RPGWEB_loadStaticContent likeds(RPGWEBRSP);
+          config likeds(RPGWEBAPP);
+          request likeds(RPGWEBRQST);
         end-pr;
 
-        dcl-pr RPGAPI_openFile int(10:0) extproc('open');
+        dcl-pr RPGWEB_openFile int(10:0) extproc('open');
           *n pointer value options(*string);
           *n int(10) value;
           *n uns(10) value options(*nopass);
@@ -203,34 +203,34 @@
           *n uns(10) value options(*nopass);
         end-pr;
 
-        dcl-pr RPGAPI_readFile int(10) extproc('read');
+        dcl-pr RPGWEB_readFile int(10) extproc('read');
           *n int(10) value; 
           *n pointer value;
           *n uns(10) value;
         end-pr ;
 
-        dcl-pr RPGAPI_closeFile int(10) extproc('close');
+        dcl-pr RPGWEB_closeFile int(10) extproc('close');
           *n  int(10) value;
         end-pr;
 
-        dcl-pr RPGAPI_toUpper varchar(32000);
+        dcl-pr RPGWEB_toUpper varchar(32000);
           line varchar(32000) const;
         end-pr;
 
-        dcl-pr RPGAPI_split char(1024) dim(50);
+        dcl-pr RPGWEB_split char(1024) dim(50);
           line varchar(32000) const;
           delimiter char(1) const;
         end-pr;
 
-        dcl-pr RPGAPI_cleanString varchar(32000);
+        dcl-pr RPGWEB_cleanString varchar(32000);
           dirty_string varchar(32000) const;
         end-pr;
 
-        dcl-pr RPGAPI_getMessage char(25);
+        dcl-pr RPGWEB_getMessage char(25);
           status zoned(3:0) const;
         end-pr;
 
-        dcl-pr RPGAPI_log int(10) extproc('Qp0zLprintf');
+        dcl-pr RPGWEB_log int(10) extproc('Qp0zLprintf');
           *n pointer value options(*string);
           *n pointer value options(*string:*nopass);
           *n pointer value options(*string:*nopass);
@@ -244,7 +244,7 @@
           *n pointer value options(*string:*nopass);
         end-pr;
 
-     D RPGAPI_translate...
+     D RPGWEB_translate...
      D                 PR                  ExtPgm('QDCXLATE')
      D   Length                       5P 0 const
      D   Data                     32766A   options(*varsize)
