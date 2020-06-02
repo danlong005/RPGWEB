@@ -51,6 +51,7 @@
           routes likeds(RPGWEB_route_ds) dim(250);
           middlewares likeds(RPGWEB_route_ds) dim(100);
           static_content varchar(1000);
+          view_location varchar(1000);
         end-ds;
 
 
@@ -185,9 +186,27 @@
           status zoned(3:0) const;
         end-pr;
 
-        dcl-pr RPGWEB_staticContentFound ind;
+        dcl-pr RPGWEB_setView;
           config likeds(RPGWEBAPP);
+          directory varchar(1000) const;
+        end-pr;
+
+        dcl-pr RPGWEB_render varchar(32000);
+          config likeds(RPGWEBAPP);
+          view_name varchar(150) const;
+        end-pr;
+
+        dcl-pr RPGWEB_write;
+          output varchar(32000) const;
+        end-pr;
+
+        dcl-pr RPGWEB_contentFound ind;
+          content varchar(1000) const;
           route char(250);
+        end-pr;
+
+        dcl-pr RPGWEB_loadContent varchar(32000);
+          content varchar(1000) const;
         end-pr;
 
         dcl-pr RPGWEB_loadStaticContent likeds(RPGWEBRSP);
@@ -208,6 +227,12 @@
           *n pointer value;
           *n uns(10) value;
         end-pr ;
+       
+        dcl-pr RPGWEB_writeFile int(10) extproc('write');
+          *n int(10) value;
+          *n pointer value;
+          *n uns(10) value;
+        end-pr;
 
         dcl-pr RPGWEB_closeFile int(10) extproc('close');
           *n  int(10) value;
@@ -230,6 +255,13 @@
           status zoned(3:0) const;
         end-pr;
 
+        dcl-pr RPGWEB_tempFile varchar(1000);
+        end-pr;
+
+        dcl-pr RPGWEB_tempFileName pointer extproc('_C_IFS_tmpnam');
+          string char(39) options(*omit);
+        end-pr;
+
         dcl-pr RPGWEB_log int(10) extproc('Qp0zLprintf');
           *n pointer value options(*string);
           *n pointer value options(*string:*nopass);
@@ -242,6 +274,10 @@
           *n pointer value options(*string:*nopass);
           *n pointer value options(*string:*nopass);
           *n pointer value options(*string:*nopass);
+        end-pr;
+
+        dcl-pr RPGWEB_system int(10:0) extproc('system');
+          *n pointer value options(*string);
         end-pr;
 
      D RPGWEB_translate...
@@ -384,7 +420,11 @@
        dcl-c INADDR_ANY 0;
        dcl-c RC_OK 0;
        
-       dcl-c O_RDONLY 1;         
+       dcl-c O_RDONLY 1;  
+       dcl-c O_WRONLY 2;  
+       dcl-c O_RDWR   4;
+       dcl-c O_CREATE 8;    
+       dcl-c O_CODEPAGE 8388608; 
        dcl-c O_TEXTDATA 16777216; 
        dcl-c O_CCSID 32; 
        dcl-c S_IRGRP 32;
