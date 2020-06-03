@@ -197,6 +197,7 @@
         end-pr;
 
         dcl-pr RPGWEB_write;
+          fd int(10:0) const;
           output varchar(32000) const;
         end-pr;
 

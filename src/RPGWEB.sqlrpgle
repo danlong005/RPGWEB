@@ -839,16 +839,19 @@
           dcl-s fd int(10:0) inz;
           dcl-s line char(100) inz;
           dcl-s cmd varchar(500) inz;
-          
+          dcl-s rpg_pgm varchar(32000) inz;
+
           output = RPGWEB_loadContent(
                      %trim(config.view_location) + '/' + 
                      %trim(view_name) + '.erpg');
 
           // parse the erpg file
-          output = 'RPGWEB_write(''' + %trim(output);
+          output = 'RPGWEB_write(fd:''' + %trim(output);
           output = %scanrpl(RPGWEB_CRLF : '' : output);
           output = %scanrpl('<%' : ''');' + RPGWEB_CRLF : output);
-          output = %scanrpl('%>' : 'RPGWEB_write(''' : output);
+          output = %scanrpl('%>' : 'RPGWEB_write(fd:''' : output);
+          output = %scanrpl('RPGWEB_write(''' : 
+                            'RPGWEB_write(fd:''' : output);
           output = %scanrpl(';' : ';' + RPGWEB_CRLF : output);
           output = %trim(output) + ''');'  + RPGWEB_DBL_CRLF;
 
@@ -865,27 +868,26 @@
                         O_WRONLY + O_TEXTDATA);
 
           if fd > -1;
-            line = '**FREE' + RPGWEB_CRLF;
-            RPGWEB_writeFile(fd : %addr(line) : %len(%trim(line)));
-
-            line = 'ctl-opt bnddir(''RPGWEB/RPGWEB'') dftactgrp(*no);' + 
-                   RPGWEB_CRLF;
-            RPGWEB_writeFile(fd : %addr(line) : %len(%trim(line)));
-
-            line = '/include RPGWEB/QRPGLESRC,RPGWEB_H' + RPGWEB_CRLF;
-            RPGWEB_writeFile(fd : %addr(line) : %len(%trim(line)));
-
-            line = 'dcl-c outputFile ''' + %trim(outputFile) + 
-                   ''';' + RPGWEB_CRLF;
-            RPGWEB_writeFile(fd : %addr(line) : %len(%trim(line)));
-
-            RPGWEB_writeFile(fd : %addr(output)+2 : %len(%trim(output)));
-
-            line = '*inlr = *on;' + RPGWEB_CRLF;
-            RPGWEB_writeFile(fd : %addr(line) : %len(%trim(line)));
+            rpg_pgm = 
+            '**FREE' + RPGWEB_CRLF + 
+            'ctl-opt bnddir(''RPGWEB/RPGWEB'') dftactgrp(*no);' + RPGWEB_CRLF +
+            '/include RPGWEB/QRPGLESRC,RPGWEB_H' + RPGWEB_CRLF +
+            'dcl-c outputFile ''' + %trim(outputFile) + '.html'';' + 
+                                                                  RPGWEB_CRLF +
+            'dcl-s fd int(10:0) inz;' + RPGWEB_CRLF +
+            'fd = RPGWEB_openFile(%trim(outputFile):O_WRONLY + O_CREATE' +
+            '+ O_CODEPAGE:S_IRGRP:819);' + RPGWEB_CRLF +
+            'RPGWEB_closeFile(fd);' + RPGWEB_CRLF +
+            'fd = RPGWEB_openFile(%trim(outputFile):O_WRONLY+O_TEXTDATA);' +
+                                                                  RPGWEB_CRLF +
+            'if fd > -1;' + RPGWEB_CRLF +
+            %trim(output) + RPGWEB_CRLF +
+            'endif;' + RPGWEB_CRLF +
+            'RPGWEB_closeFile(fd);' + RPGWEB_CRLF +
+            '*inlr = *on;' + RPGWEB_CRLF +
+            'return;' + RPGWEB_CRLF;
             
-            line = 'return;' + RPGWEB_CRLF;
-            RPGWEB_writeFile(fd : %addr(line) : %len(%trim(line)));
+            RPGWEB_writeFile(fd : %addr(rpg_pgm)+2 : %len(%trim(rpg_pgm)));
 
             RPGWEB_closeFile(fd);              
           endif;
@@ -896,8 +898,9 @@
                 'SRCSTMF(''' + %trim(outputFile) + ''')';
           RPGWEB_system(cmd);
 
-          // run the program and pass the filename to it
-          // RPGWEB_runViewPgm(outputFile);
+          // run the program
+          cmd = 'CALL QTEMP/' + %trim(program);
+          RPGWEB_system(cmd);
 
           // read the output file into output
           output = RPGWEB_loadContent(%trim(outputFile) + '.html');
@@ -907,9 +910,16 @@
 
         dcl-proc RPGWEB_write export;
           dcl-pi *n;
+            fd int(10:0) const;
             output varchar(32000) const;
           end-pi;
+          dcl-s line varchar(32000) inz;
+          dcl-s length int(10:0) inz;
 
+          line = output;
+          length = %len(%trim(line));
+
+          RPGWEB_writeFile(fd: %addr(line)+2:length);
         end-proc;
 
         dcl-proc RPGWEB_tempFile;
