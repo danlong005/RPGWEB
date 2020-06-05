@@ -832,20 +832,38 @@
           dcl-pi *n varchar(32000);
             config likeds(RPGWEBAPP);
             view_name varchar(150) const;
+            injected_data varchar(32000) const;
           end-pi;
           dcl-s output varchar(32000) inz;
+          dcl-s data_decs varchar(32000) inz;
           dcl-s outputFile varchar(1000) inz;
           dcl-s program varchar(1000) inz;
           dcl-s fd int(10:0) inz;
           dcl-s line char(100) inz;
           dcl-s cmd varchar(500) inz;
           dcl-s rpg_pgm varchar(32000) inz;
+          dcl-s start_pos int(10:0) inz;
+          dcl-s stop_pos int(10:0) inz;
 
           output = RPGWEB_loadContent(
                      %trim(config.view_location) + '/' + 
                      %trim(view_name) + '.erpg');
 
           // parse the erpg file
+          start_pos = -1;
+          start_pos = %scan('<%=' : output);
+          if start_pos > 0;
+            stop_pos = -1;
+            stop_pos = %scan('=%>' : output);
+
+            data_decs = %subst(output : start_pos : stop_pos + 3);
+            data_decs = %scanrpl('RPGWEB_injected_data()' : 
+                  '''' + %trim(injected_data) + '''' : data_decs);
+            output = %subst(output : stop_pos + 3);
+            data_decs = %scanrpl('<%=' : '' : data_decs);
+            data_decs = %scanrpl('=%>' : '' : data_decs);
+          endif;
+
           output = 'RPGWEB_write(fd:''' + %trim(output);
           output = %scanrpl(RPGWEB_CRLF : '' : output);
           output = %scanrpl('<%' : ''');' + RPGWEB_CRLF : output);
@@ -875,6 +893,7 @@
             'dcl-c outputFile ''' + %trim(outputFile) + '.html'';' + 
                                                                   RPGWEB_CRLF +
             'dcl-s fd int(10:0) inz;' + RPGWEB_CRLF +
+            %trim(data_decs) + RPGWEB_CRLF +
             'fd = RPGWEB_openFile(%trim(outputFile):O_WRONLY + O_CREATE' +
             '+ O_CODEPAGE:S_IRGRP:819);' + RPGWEB_CRLF +
             'RPGWEB_closeFile(fd);' + RPGWEB_CRLF +
