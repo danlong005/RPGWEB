@@ -194,6 +194,7 @@
         dcl-pr RPGWEB_render varchar(32000);
           config likeds(RPGWEBAPP);
           view_name varchar(150) const;
+          injected_data varchar(32000) const;
         end-pr;
 
         dcl-pr RPGWEB_write;
