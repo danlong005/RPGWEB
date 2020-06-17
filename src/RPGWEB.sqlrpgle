@@ -864,12 +864,12 @@
             data_decs = %scanrpl('=%>' : '' : data_decs);
           endif;
 
-          output = 'RPGWEB_write(fd:''' + %trim(output);
           output = %scanrpl(RPGWEB_CRLF : '' : output);
+          output = %scanrpl('RPGWEB_write(' : 
+                  'RPGWEB_write(fd:' : output);
+          output = 'RPGWEB_write(fd:''' + %trim(output);
           output = %scanrpl('<%' : ''');' + RPGWEB_CRLF : output);
           output = %scanrpl('%>' : 'RPGWEB_write(fd:''' : output);
-          output = %scanrpl('RPGWEB_write(''' : 
-                            'RPGWEB_write(fd:''' : output);
           output = %scanrpl(';' : ';' + RPGWEB_CRLF : output);
           output = %trim(output) + ''');'  + RPGWEB_DBL_CRLF;
 
@@ -916,6 +916,8 @@
           cmd = 'CRTBNDRPG PGM(QTEMP/' + %trim(program) + ') ' +                  
                 'SRCSTMF(''' + %trim(outputFile) + ''')';
           RPGWEB_system(cmd);
+
+          // if the program doesn't compile pick up the compile listing
 
           // run the program
           cmd = 'CALL QTEMP/' + %trim(program);
