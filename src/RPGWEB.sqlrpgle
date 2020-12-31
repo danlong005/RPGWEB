@@ -6,12 +6,10 @@
             config likeds(RPGWEBAPP);
             port int(10:0) options(*nopass) const;
           end-pi;
-          dcl-s index int(10:0) inz;
-          dcl-s index2 int(10:0) inz;
-          dcl-s route_found ind inz;
+
           dcl-ds response likeds(RPGWEBRSP) inz;
           dcl-ds request likeds(RPGWEBRQST) inz;
-          dcl-s continue_request ind;
+          dcl-s cmd varchar(32000) inz;
 
           if config.port = 0 and %parms < 2;
             config.port = 3000;
@@ -25,59 +23,21 @@
                 clear request;
                 request = RPGWEB_acceptRequest(config);
 
-                clear response;
-                clear route_found;
-                continue_request = *on;
+                 // CREATE RANDOM ID  - RPGWEB_TEMPFILE
+                 request_id = RPGWEB_tempFile();
 
-                // run middlewares
-                for index2 = 1 to %elem(config.middlewares) by 1;
-                  if continue_request;
-                    if config.middlewares(index2).url <> *blanks;
-                      if RPGWEB_mwMatches(config.middlewares(index2) : 
-                                          request);
-                        RPGWEB_mwCallback_ptr = 
-                          config.middlewares(index2).procedure;
-                        continue_request = 
-                            RPGWEB_mwCallback(request : response);
-                      endif;
-                    else;
-                      index2 = %elem(config.middlewares) + 1;
-                    endif;
-                  else;
-                    index2 = %elem(config.middlewares) + 1;
-                  endif;
-                endfor;
+                 // STORE CONFIG AND REQUEST IN TABLE
+                 exec sql insert into RPGWEB.RPGWEBP 
+                          values (:request_id, :request);
 
-                // run routes
-                if continue_request;
-                  for index = 1 to %elem(config.routes) by 1;
-                    if (config.routes(index).url <> *blanks);
-                      if RPGWEB_routeMatches(config.routes(index) : request);
-                        RPGWEB_callback_ptr = config.routes(index).procedure;
-                        response = RPGWEB_callback(request);
-                        route_found = *on;
-                        index = %elem(config.routes) + 1;
-                      endif;
-                    else;
-                      index = %elem(config.routes) + 1;
-                    endif;
-                  endfor;
-                endif;
-                
-                // look for static content
-                if not route_found and continue_request;
-                  if RPGWEB_contentFound(config.static_content : request.route);
-                    route_found = *on;
-                    response = RPGWEB_loadStaticContent(config : request);
-                  endif;
-                endif;
 
-                // end of the rope just 404 it
-                if not route_found and continue_request;
-                  response = RPGWEB_setResponse(request :  HTTP_NOT_FOUND);
-                endif;
+                // submit out to another program WITH THE RANDOM ID
+                cmd = 'SBMJOB CMD(CALL RPGWEB/RPGWEB_THD PARM(' +
+                 %trim()
+                 +')) JOBQ(QS36EVOKE)';
 
-                RPGWEB_sendResponse(config : response);
+                // SUBMIT CALL
+                RPGWEB_system(cmd);
               on-error;
                 response = RPGWEB_setResponse(request : 
                                               HTTP_INTERNAL_SERVER);
@@ -94,7 +54,6 @@
         end-proc;
 
 
-
         dcl-proc RPGWEB_stop export;
           dcl-pi *n;
             config likeds(RPGWEBAPP) const;
@@ -103,7 +62,6 @@
           close_port( config.return_socket_descriptor );
           close_port( config.socket_descriptor );
         end-proc;
-
 
 
         dcl-proc RPGWEB_acceptRequest export;
@@ -656,7 +614,7 @@
         end-proc;
 
 
-        dcl-proc RPGWEB_setResponse;
+        dcl-proc RPGWEB_setResponse export;
           dcl-pi *n likeds(RPGWEBRSP);
             request likeds(RPGWEBRQST);
             status zoned(3:0) const;
@@ -753,7 +711,7 @@
           return %trim(message);
         end-proc;
 
-        dcl-proc RPGWEB_contentFound;
+        dcl-proc RPGWEB_contentFound export;
           dcl-pi *n ind;
             content varchar(1000) const;
             route char(250);
@@ -773,7 +731,7 @@
           return foundFile;
         end-proc;
 
-        dcl-proc RPGWEB_loadStaticContent;
+        dcl-proc RPGWEB_loadStaticContent export;
           dcl-pi *n likeds(RPGWEBRSP);
             config likeds(RPGWEBAPP);
             request likeds(RPGWEBRQST);
@@ -864,12 +822,12 @@
             data_decs = %scanrpl('=%>' : '' : data_decs);
           endif;
 
-          output = 'RPGWEB_write(fd:''' + %trim(output);
           output = %scanrpl(RPGWEB_CRLF : '' : output);
+          output = %scanrpl('RPGWEB_write(' : 
+                  'RPGWEB_write(fd:' : output);
+          output = 'RPGWEB_write(fd:''' + %trim(output);
           output = %scanrpl('<%' : ''');' + RPGWEB_CRLF : output);
           output = %scanrpl('%>' : 'RPGWEB_write(fd:''' : output);
-          output = %scanrpl('RPGWEB_write(''' : 
-                            'RPGWEB_write(fd:''' : output);
           output = %scanrpl(';' : ';' + RPGWEB_CRLF : output);
           output = %trim(output) + ''');'  + RPGWEB_DBL_CRLF;
 
@@ -916,6 +874,8 @@
           cmd = 'CRTBNDRPG PGM(QTEMP/' + %trim(program) + ') ' +                  
                 'SRCSTMF(''' + %trim(outputFile) + ''')';
           RPGWEB_system(cmd);
+
+          // if the program doesn't compile pick up the compile listing
 
           // run the program
           cmd = 'CALL QTEMP/' + %trim(program);
