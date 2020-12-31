@@ -48,6 +48,21 @@ PGM PARM(&LOCATION)
              MBROPT(*REPLACE) 
   CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB_THD) SRCTYPE(SQLRPGLE) 
 
+  CPYFRMSTMF FROMSTMF(&LOCATION *TCAT '/RPGWEB/SRC/RPGWEBP.pf') + 
+             TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/RPGWEBP.MBR') + 
+             MBROPT(*REPLACE) 
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEBP) SRCTYPE(PF) 
+
+  /* delete the request file if it exists */
+  DLTF FILE(RPGWEB/RPGWEBP)
+  MONMSG MSGID(CPF2105) 
+
+  /* create the file to write the requests too */
+  CRTPF FILE(RPGWEB/RPGWEBP)      +
+        SRCFILE(RPGWEB/QRPGLESRC) +
+        SRCMBR(RPGWEBP)           +
+        SIZE(*NOMAX)             
+
   /* compile the module */
   CRTSQLRPGI OBJ(RPGWEB/RPGWEB) +         
              SRCFILE(RPGWEB/QRPGLESRC) +   

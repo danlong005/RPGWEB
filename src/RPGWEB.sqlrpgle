@@ -8,7 +8,7 @@
           end-pi;
 
           dcl-ds response likeds(RPGWEBRSP) inz;
-          dcl-ds request likeds(RPGWEBRQST) inz;
+          dcl-s request_id varchar(1000) inz;
           dcl-s cmd varchar(32000) inz;
 
           if config.port = 0 and %parms < 2;
@@ -20,23 +20,13 @@
           if (RPGWEB_setup(config));
             dow 1 = 1;
               monitor;
-                clear request;
-                request = RPGWEB_acceptRequest(config);
+                clear request_id;
+                request_id = RPGWEB_acceptRequest(config);
 
-                 // CREATE RANDOM ID  - RPGWEB_TEMPFILE
-                 request_id = RPGWEB_tempFile();
-
-                 // STORE CONFIG AND REQUEST IN TABLE
-                 exec sql insert into RPGWEB.RPGWEBP 
-                          values (:request_id, :request);
-
-
-                // submit out to another program WITH THE RANDOM ID
                 cmd = 'SBMJOB CMD(CALL RPGWEB/RPGWEB_THD PARM(' +
-                 %trim()
-                 +')) JOBQ(QS36EVOKE)';
+                      %trim(request_id) +
+                      ')) JOBQ(QS36EVOKE)';
 
-                // SUBMIT CALL
                 RPGWEB_system(cmd);
               on-error;
                 response = RPGWEB_setResponse(request : 
@@ -65,12 +55,13 @@
 
 
         dcl-proc RPGWEB_acceptRequest export;
-          dcl-pi *n likeds(RPGWEBRQST);
+          dcl-pi *n varchar(1000);
             config likeds(RPGWEBAPP);
           end-pi;
           dcl-ds socket_address likeds(socketaddr);
           dcl-s data char(32766);
           dcl-s return_code int(10:0) inz(0);
+          dcl-s request_id varchar(1000);
 
           clear socket_address;
           socket_address.sin_family = AF_INET;
@@ -85,7 +76,19 @@
 
           RPGWEB_translate( %len(%trim(data)) : data : 
                             'QJSONIN' : 'RPGWEB');
-          return RPGWEB_parse(data);
+
+          // write to the RPGWEBP file
+          request_id = RPGWEB_templFile();
+          exec sql insert into RPGWEB.RPGWEBP 
+                   values(:request_id, 'R', :data);
+
+          // write the config to the request file
+          exec sql insert into RPGWEB.RPGWEBP 
+                   values(:request_id, 'C', :config);
+
+          return request_id;
+
+          //return RPGWEB_parse(data);
         end-proc;
 
 

@@ -75,7 +75,7 @@
           config likeds(RPGWEBAPP) const;
         end-pr;
 
-        dcl-pr RPGWEB_acceptRequest likeds(RPGWEBRQST);
+        dcl-pr RPGWEB_acceptRequest varchar(1000);
           config likeds(RPGWEBAPP);
         end-pr;
 
