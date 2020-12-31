@@ -43,6 +43,11 @@ PGM PARM(&LOCATION)
              MBROPT(*REPLACE) 
   CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB_B) SRCTYPE(BND)       
 
+  CPYFRMSTMF FROMSTMF(&LOCATION *TCAT '/RPGWEB/SRC/RPGWEB_THD.sqlrpgle') + 
+             TOMBR('/QSYS.LIB/RPGWEB.LIB/QRPGLESRC.FILE/RPGWEB_THD.MBR') + 
+             MBROPT(*REPLACE) 
+  CHGPFM FILE(RPGWEB/QRPGLESRC) MBR(RPGWEB_THD) SRCTYPE(SQLRPGLE) 
+
   /* compile the module */
   CRTSQLRPGI OBJ(RPGWEB/RPGWEB) +         
              SRCFILE(RPGWEB/QRPGLESRC) +   
@@ -60,5 +65,12 @@ PGM PARM(&LOCATION)
 
 
   /* add the entry in the BNDDIR */
-  ADDBNDDIRE BNDDIR(RPGWEB/RPGWEB) OBJ((RPGWEB/RPGWEB))                                                       
+  ADDBNDDIRE BNDDIR(RPGWEB/RPGWEB) OBJ((RPGWEB/RPGWEB))
+
+  /* compile the program that is kicked out as a thread */
+  CRTSQLRPGI OBJ(RPGWEB/RPGWEB_THD)  +
+           SRCFILE(RPGWEB/QRPGLESRC) +
+           SRCMBR(RPGWEB_THD)        +
+           OBJTYPE(*PGM)             + 
+           REPLACE(*YES)                                                                   
 endpgm

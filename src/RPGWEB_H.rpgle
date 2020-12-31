@@ -282,6 +282,13 @@
           *n pointer value options(*string);
         end-pr;
 
+
+        dcl-pr RPGWEB_thread extpgm('RPGWEB_THD');
+          config likeds(RPGWEBAPP);
+          request likeds(RPGWEBRQST);
+        end-pr;
+
+
      D RPGWEB_translate...
      D                 PR                  ExtPgm('QDCXLATE')
      D   Length                       5P 0 const
